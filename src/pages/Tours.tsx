@@ -72,6 +72,24 @@ export default function Tours() {
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
+  const groupedTours = [
+    {
+      category: "The Island Series",
+      featuredImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80",
+      items: tours.filter(t => t.category === "beach" || t.category === "adventure")
+    },
+    {
+      category: "The Cultural Series",
+      featuredImage: "https://images.unsplash.com/photo-1590502593747-42a996133562?w=1200&q=80",
+      items: tours.filter(t => t.category === "culture" || t.category === "food")
+    },
+    {
+      category: "The Wild Series",
+      featuredImage: "https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0?w=1200&q=80",
+      items: tours.filter(t => t.category === "wildlife")
+    }
+  ];
+
   return (
     <div ref={containerRef} className="min-h-screen bg-sand/30">
       {/* Cinematic Hero Section */}
@@ -96,57 +114,73 @@ export default function Tours() {
         </div>
       </section>
 
-      {/* Grid Section */}
-      <section className="py-12 bg-white relative">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24">
-          <div className="flex justify-between items-center mb-10 border-b border-charcoal/5 pb-4">
-             <div className="flex items-center gap-6">
-               <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">The Island Series</span>
-               <div className="flex gap-4">
-                 {['Culture', 'Nature', 'Private', 'Aerial'].map(cat => (
-                   <button key={cat} className="text-[9px] font-bold tracking-widest uppercase text-charcoal/40 hover:text-amber transition-colors hover-trigger">
-                     {cat}
-                   </button>
-                 ))}
-               </div>
-             </div>
-             
-             <div className="relative hidden md:block">
-                <input 
-                  type="text" 
-                  placeholder="Locate Experience" 
-                  className="bg-sand/30 border-b border-charcoal/10 py-1.5 px-4 text-[9px] font-bold uppercase tracking-widest focus:outline-none focus:border-amber transition-all w-48"
-                />
-                <Search className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 text-charcoal/20" />
-             </div>
+      {/* Grouped Chapters */}
+      {groupedTours.map((group, index) => (
+        <section key={group.category} className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white relative">
+          {/* Sticky Visual Side */}
+          <div className="sticky top-0 h-[50vh] lg:h-screen overflow-hidden border-r border-charcoal/5">
+            <motion.img 
+              initial={{ scale: 1.1, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 2 }}
+              src={group.featuredImage} 
+              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-[2000ms]" 
+              alt={group.category}
+            />
+            <div className="absolute inset-0 bg-charcoal/20" />
+            <div className="absolute bottom-12 left-12 z-10">
+              <span className="text-[8px] font-bold tracking-[0.5em] text-white/50 uppercase">Series {String(index + 1).padStart(2, '0')}</span>
+              <h2 className="text-6xl text-white font-display italic mt-2 tracking-tighter">{group.category}</h2>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
-            {tours.map((tour, index) => (
-              <TourCard key={tour.id} tour={tour} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
+          {/* Scrolling Content Side */}
+          <div className="py-24 px-8 lg:px-24 space-y-32 bg-white">
+            <div className="max-w-md">
+               <span className="text-[7px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Selection Archive</span>
+               <p className="mt-6 text-charcoal/60 text-sm font-light leading-relaxed italic">
+                 "A curated set of experiences designed to resonate with the specific frequency 
+                 of {group.category.toLowerCase()}."
+               </p>
+            </div>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-sand relative overflow-hidden">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24 text-center">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <span className="text-[7px] font-bold tracking-[0.5em] uppercase text-charcoal/30">Private Charters</span>
-            <h2 className="text-charcoal text-[clamp(1.8rem,4vw,2.5rem)] font-display italic leading-none tracking-tighter">
-              A purely sovereign way <br /> to experience Zanzibar.
+            <div className="grid grid-cols-1 gap-24">
+              {group.items.map((tour, i) => (
+                <TourCard key={tour.id} tour={tour} index={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
+
+      {/* Private Sovereign CTA */}
+      <section className="py-32 bg-charcoal relative overflow-hidden group">
+        <div className="max-w-[1200px] mx-auto px-6 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="space-y-8"
+          >
+            <span className="text-[8px] font-bold tracking-[0.5em] uppercase text-white/20">The Deployment</span>
+            <h2 className="text-white text-[clamp(2.5rem,6vw,4.5rem)] font-display italic leading-[0.9] tracking-tighter">
+              A purely sovereign way <br /> <span className="text-amber">to experience Zanzibar.</span>
             </h2>
-            <p className="text-charcoal/60 text-sm font-light leading-relaxed">
+            <p className="text-white/40 text-lg font-light leading-relaxed max-w-xl mx-auto italic">
               For those who value absolute seclusion, we offer private yacht and helicopter 
               deployments across the archipelago.
             </p>
-            <div className="pt-4">
-              <Link to="/contact" className="btn-raw hover-trigger">
+            <div className="pt-8">
+              <Link to="/contact" className="btn-raw !px-16 !py-5 hover-trigger">
                 Inquire Sovereignty
               </Link>
             </div>
-          </div>
+          </motion.div>
+        </div>
+        
+        {/* Abstract watermark */}
+        <div className="absolute inset-0 opacity-[0.02] select-none pointer-events-none flex items-center justify-center">
+           <h1 className="text-[30vw] font-display font-bold text-white italic">ZANTRICA</h1>
         </div>
       </section>
     </div>
