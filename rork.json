@@ -1,0 +1,10 @@
+{
+  "$schema": "https://rork.com/schema/rork.json",
+  "apps": [
+    {
+      "name": "ZanTrica Tours & Safaris",
+      "path": "web",
+      "framework": "web"
+    }
+  ]
+}
