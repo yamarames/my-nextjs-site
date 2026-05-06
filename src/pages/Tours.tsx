@@ -1,198 +1,152 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Star, Clock, Users, ArrowRight, Filter, ArrowUpRight } from "lucide-react";
-import { tours, type Tour } from "@/data/tours";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import {
+  ArrowUpRight,
+  Search,
+  MoveRight,
+} from "lucide-react";
+import { tours } from "@/data/tours";
 
-const categories = [
-  { id: "all", label: "All Tours" },
-  { id: "beach", label: "Beach" },
-  { id: "culture", label: "Culture" },
-  { id: "adventure", label: "Adventure" },
-  { id: "wildlife", label: "Wildlife" },
-  { id: "food", label: "Food" },
-];
-
-export default function Tours() {
-  const [activeCategory, setActiveCategory] = useState("all");
-
-  const filteredTours = activeCategory === "all"
-    ? tours
-    : tours.filter((t) => t.category === activeCategory);
+const TourCard = ({ tour, index }: { tour: any; index: number }) => {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="min-h-screen bg-sand">
-      {/* Hero */}
-      <section className="relative h-[55vh] min-h-[450px] overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1920&q=80"
-          alt="Zanzibar Tours"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/70 via-charcoal/35 to-charcoal/80" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <span className="text-amber font-semibold text-[11px] tracking-[0.2em] uppercase mb-4 block">
-                Daily Excursions
-              </span>
-              <h1 className="font-display text-[clamp(3rem,7vw,5.5rem)] text-white mb-5 tracking-tight leading-[1.05]">
-                Zanzibar Tours
-              </h1>
-              <p className="text-lg text-white/60 max-w-xl leading-relaxed font-light">
-                From spice plantations to pristine reefs, discover the magic of
-                Zanzibar with our curated daily experiences.
-              </p>
-            </motion.div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: index * 0.05 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group"
+    >
+      <Link to={`/tours/${tour.id}`} className="block">
+        <div className="relative aspect-[3/4] overflow-hidden bg-sand mb-4 shadow-lg">
+          <motion.img
+            animate={{ scale: isHovered ? 1.05 : 1 }}
+            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+            src={tour.image}
+            alt={tour.title}
+            loading="lazy"
+            className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-[1500ms]"
+          />
+          <div className="absolute inset-0 bg-charcoal/10 group-hover:bg-transparent transition-colors duration-700" />
+          
+          <div className="absolute top-4 right-4 z-20">
+            <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center -rotate-45 group-hover:rotate-0 transition-transform duration-700">
+              <ArrowUpRight className="w-4 h-4 text-white" />
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-700 bg-gradient-to-t from-charcoal/80 to-transparent">
+             <div className="flex items-center gap-2 text-white/60 text-[7px] font-bold tracking-widest uppercase">
+                <span className="text-amber italic font-display normal-case text-xs">{tour.duration}</span>
+                <span className="opacity-20">/</span>
+                <span>{tour.location}</span>
+             </div>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <h3 className="text-lg font-display text-charcoal leading-tight italic group-hover:text-amber transition-colors duration-500">
+            {tour.title}
+          </h3>
+          <div className="flex justify-between items-center">
+            <span className="text-[7px] font-bold text-charcoal/20 uppercase tracking-[0.3em]">{tour.category}</span>
+            <span className="font-display text-base italic text-charcoal/80 tracking-tighter">${tour.price}</span>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+};
+
+export default function Tours() {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  return (
+    <div ref={containerRef} className="min-h-screen bg-sand/30">
+      {/* Cinematic Hero Section */}
+      <section className="relative h-screen bg-charcoal flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-40 grayscale">
+            <source src="/videos/tours-hero.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-transparent to-charcoal" />
+        </div>
+        <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="text-[10px] font-bold tracking-[1em] uppercase text-amber mb-6 block">Chapter 01</span>
+            <h1 className="text-white text-[12vw] font-display leading-[0.8] italic tracking-tighter">
+              The Island <br /> <span className="text-amber/90">Series.</span>
+            </h1>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Grid Section */}
+      <section className="py-12 bg-white relative">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24">
+          <div className="flex justify-between items-center mb-10 border-b border-charcoal/5 pb-4">
+             <div className="flex items-center gap-6">
+               <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">The Island Series</span>
+               <div className="flex gap-4">
+                 {['Culture', 'Nature', 'Private', 'Aerial'].map(cat => (
+                   <button key={cat} className="text-[9px] font-bold tracking-widest uppercase text-charcoal/40 hover:text-amber transition-colors hover-trigger">
+                     {cat}
+                   </button>
+                 ))}
+               </div>
+             </div>
+             
+             <div className="relative hidden md:block">
+                <input 
+                  type="text" 
+                  placeholder="Locate Experience" 
+                  className="bg-sand/30 border-b border-charcoal/10 py-1.5 px-4 text-[9px] font-bold uppercase tracking-widest focus:outline-none focus:border-amber transition-all w-48"
+                />
+                <Search className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 text-charcoal/20" />
+             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+            {tours.map((tour, index) => (
+              <TourCard key={tour.id} tour={tour} index={index} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Filters & Grid */}
-      <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Category Filter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-2.5 mb-14"
-          >
-            <Filter className="w-4 h-4 text-warm-gray mr-2 mt-3" />
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-5 py-2.5 rounded-full text-[13px] font-semibold tracking-wide transition-all duration-500 ${
-                  activeCategory === cat.id
-                    ? "bg-teal text-white shadow-lg shadow-teal/20"
-                    : "bg-white text-warm-gray hover:bg-teal/[0.06] hover:text-teal"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </motion.div>
-
-          {/* Tours Grid */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCategory}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {filteredTours.map((tour: Tour, i: number) => (
-                <motion.div
-                  key={tour.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: i * 0.08,
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                >
-                  <Link
-                    to={`/tours/${tour.id}`}
-                    className="group block bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-charcoal/8 transition-all duration-700"
-                  >
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <img
-                        src={tour.image}
-                        alt={tour.title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-4 left-4">
-                        <span className="px-3.5 py-1.5 bg-white/90 backdrop-blur-xl rounded-full text-[11px] font-semibold text-charcoal tracking-wide capitalize">
-                          {tour.category}
-                        </span>
-                      </div>
-                      <div className="absolute top-4 right-4">
-                        <span className="px-3.5 py-1.5 bg-teal/90 backdrop-blur-xl rounded-full text-[11px] font-semibold text-white tracking-wide">
-                          {tour.duration}
-                        </span>
-                      </div>
-                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">
-                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                          <ArrowUpRight className="w-4 h-4 text-charcoal" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center gap-1.5 text-amber mb-2.5">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span className="text-sm font-semibold">
-                          {tour.rating}
-                        </span>
-                        <span className="text-[11px] text-warm-gray">
-                          ({tour.reviewCount} reviews)
-                        </span>
-                      </div>
-                      <h3 className="font-display text-xl text-charcoal mb-2 group-hover:text-teal transition-colors duration-500 tracking-tight">
-                        {tour.title}
-                      </h3>
-                      <p className="text-[13px] text-warm-gray leading-[1.75] mb-5 line-clamp-2">
-                        {tour.description}
-                      </p>
-                      <div className="flex items-center justify-between pt-5 border-t border-gray-100">
-                        <div className="flex items-center gap-5 text-[12px] text-warm-gray">
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {tour.location}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Users className="w-3.5 h-3.5" />
-                            Max {tour.maxGroupSize}
-                          </span>
-                        </div>
-                        <div className="font-semibold text-teal text-lg">
-                          ${tour.price}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 bg-teal relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.06]">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-amber rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
-        </div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h2 className="font-display text-3xl sm:text-4xl text-white mb-5 tracking-tight">
-              Can't Decide Which Tour?
+      {/* CTA Section */}
+      <section className="py-16 bg-sand relative overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24 text-center">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <span className="text-[7px] font-bold tracking-[0.5em] uppercase text-charcoal/30">Private Charters</span>
+            <h2 className="text-charcoal text-[clamp(1.8rem,4vw,2.5rem)] font-display italic leading-none tracking-tighter">
+              A purely sovereign way <br /> to experience Zanzibar.
             </h2>
-            <p className="text-white/60 mb-10 max-w-lg mx-auto leading-relaxed font-light">
-              Let our local experts help you craft the perfect Zanzibar
-              experience tailored to your interests and schedule.
+            <p className="text-charcoal/60 text-sm font-light leading-relaxed">
+              For those who value absolute seclusion, we offer private yacht and helicopter 
+              deployments across the archipelago.
             </p>
-            <Link
-              to="/contact"
-              className="group inline-flex items-center gap-2.5 px-8 py-4 bg-amber text-charcoal rounded-2xl font-semibold text-sm tracking-wide hover:bg-gold transition-all duration-500 hover:shadow-xl hover:shadow-amber/25 hover:-translate-y-0.5"
-            >
-              Get Personalized Recommendations
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </motion.div>
+            <div className="pt-4">
+              <Link to="/contact" className="btn-raw hover-trigger">
+                Inquire Sovereignty
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
