@@ -130,15 +130,15 @@ export default function Tours() {
             <div className="absolute inset-0 bg-charcoal/20" />
             <div className="absolute bottom-12 left-12 z-10">
               <span className="text-[8px] font-bold tracking-[0.5em] text-white/50 uppercase">Series {String(index + 1).padStart(2, '0')}</span>
-              <h2 className="text-6xl text-white font-display italic mt-2 tracking-tighter">{group.category}</h2>
+              <h2 className="text-huge text-white mt-2">{group.category}</h2>
             </div>
           </div>
 
           {/* Scrolling Content Side */}
-          <div className="py-24 px-8 lg:px-24 space-y-32 bg-white">
+          <div className="py-24 px-12 lg:px-32 space-y-32 bg-white">
             <div className="max-w-md">
                <span className="text-[7px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Selection Archive</span>
-               <p className="mt-6 text-charcoal/60 text-sm font-light leading-relaxed italic">
+               <p className="mt-6 text-charcoal/60 text-lg font-light leading-relaxed italic">
                  "A curated set of experiences designed to resonate with the specific frequency 
                  of {group.category.toLowerCase()}."
                </p>
