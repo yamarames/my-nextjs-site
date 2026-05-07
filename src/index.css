@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 10% 98%;
+    --foreground: 30 15% 5%;
+
+    --card: 30 10% 98%;
+    --card-foreground: 30 15% 5%;
+
+    --primary: 152 40% 15%;
+    --primary-foreground: 30 10% 98%;
+
+    --secondary: 32 60% 45%;
+    --secondary-foreground: 30 10% 98%;
+
+    --accent: 14 60% 40%;
+    --accent-foreground: 30 10% 98%;
+
+    --border: 30 10% 90%;
+    --input: 30 10% 85%;
+    --ring: 152 40% 15%;
+
+    --radius: 0rem; 
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    cursor: default;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-transform: none;
+  }
+
+  p {
+    @apply leading-relaxed text-base;
+    font-feature-settings: "pnum" on, "lnum" on;
+  }
+
+  ::selection {
+    @apply bg-amber/30 text-charcoal;
+  }
+
+  /* Custom Cursor - Human Touch */
+  .cursor-dot {
+    @apply pointer-events-none fixed z-[999] w-2 h-2 bg-amber rounded-full mix-blend-difference transition-transform duration-300 ease-out scale-0;
+  }
+  
+  .cursor-follower {
+    @apply pointer-events-none fixed z-[998] w-6 h-6 border border-amber/30 rounded-full mix-blend-difference transition-transform duration-500 ease-out scale-0;
+  }
+
+  .hover-trigger:hover ~ .cursor-dot { @apply scale-100; }
+}
+
+@layer components {
+  .editorial-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+  }
+
+  .text-huge {
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .text-large {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .btn-raw {
+    @apply relative px-6 py-3 bg-charcoal text-white font-bold text-[8px] tracking-[0.25em] uppercase transition-all duration-700 overflow-hidden;
+    @apply hover:bg-amber hover:text-charcoal hover:-translate-y-0.5 hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)];
+  }
+
+  .btn-raw-outline {
+    @apply relative px-6 py-3 border border-charcoal/10 text-charcoal font-bold text-[8px] tracking-[0.25em] uppercase transition-all duration-700;
+    @apply hover:bg-charcoal hover:text-white hover:-translate-y-0.5;
+  }
+
+  .card-stack {
+    @apply relative overflow-hidden bg-sand/50;
+    aspect-ratio: 4/5;
+  }
+
+  .card-stack img {
+    @apply w-full h-full object-cover grayscale-[30%];
+    transition: transform 3000ms cubic-bezier(0.16, 1, 0.3, 1), filter 1500ms ease;
+  }
+
+  .card-stack:hover img {
+    @apply scale-110 grayscale-0;
+  }
+
+  .grain-overlay {
+    @apply pointer-events-none fixed inset-0 z-[105] opacity-[0.04];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .mask-reveal {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transition: clip-path 2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mask-hidden {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+
+  .section-divider {
+    @apply w-full h-px bg-charcoal/5 my-20;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  .mix-blend-difference { mix-blend-mode: difference; }
+  .mix-blend-multiply { mix-blend-mode: multiply; }
+  .mix-blend-overlay { mix-blend-mode: overlay; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-sand;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-charcoal/20 transition-colors duration-500;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-amber;
+}

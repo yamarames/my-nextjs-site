@@ -17,12 +17,17 @@ export default {
         display: ["'Cormorant Garamond'", "Georgia", "serif"],
         body: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
       },
+      fontSize: {
+        'huge': ['clamp(3rem, 8vw, 8rem)', { lineHeight: '0.85', letterSpacing: '-0.04em' }],
+        'editorial': ['clamp(1.5rem, 4vw, 2.5rem)', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
+      },
       colors: {
         sand: "#F7F3ED",
         amber: "#C9965E",
         teal: "#1E5941",
         coral: "#C46B52",
         charcoal: "#141414",
+        'charcoal-muted': 'rgba(20, 20, 20, 0.6)',
         "warm-gray": "#5E5A55",
         cream: "#F0EBE1",
         "deep-forest": "#143D2B",
