@@ -107,7 +107,7 @@ export default function Safaris() {
           <div className="max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24">
             <div className="mb-24 max-w-2xl">
               <span className="text-[8px] font-bold tracking-[0.5em] uppercase text-charcoal/30 block mb-4">Frontier {fIndex + 1}</span>
-              <h2 className="text-huge font-display italic leading-none tracking-tighter mb-8">{frontier.name}</h2>
+              <h2 className="text-huge mb-8">{frontier.name}</h2>
               <p className="text-charcoal/50 text-lg font-light leading-relaxed italic border-l border-amber/30 pl-8">
                 "{frontier.description}"
               </p>
