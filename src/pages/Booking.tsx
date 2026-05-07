@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   Calendar as CalendarIcon,
   Users,
@@ -8,11 +8,10 @@ import {
   Plus,
   Check,
   ArrowRight,
-  CreditCard,
-  Shield,
-  Clock,
-  MapPin,
-  Star,
+  ShieldCheck,
+  MoveRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   format,
@@ -20,7 +19,6 @@ import {
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isSameMonth,
   isSameDay,
   isBefore,
   startOfDay,
@@ -48,14 +46,15 @@ export default function Booking() {
   const [children, setChildren] = useState(0);
   const [selectedItems, setSelectedItems] = useState<BookingItem[]>([]);
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    country: "",
-    specialRequests: "",
+
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
   });
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   useEffect(() => {
     const items: BookingItem[] = [];
@@ -87,7 +86,7 @@ export default function Booking() {
     }
     if (items.length === 0) {
       items.push(
-        ...tours.slice(0, 3).map((t) => ({
+        ...tours.slice(0, 1).map((t) => ({
           id: t.id,
           title: t.title,
           type: "tour" as const,
@@ -123,344 +122,228 @@ export default function Booking() {
   };
 
   return (
-    <div className="min-h-screen bg-sand pt-[72px]">
-      {/* Header */}
-      <section className="bg-charcoal py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.05]">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-teal rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
-        </div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h1 className="font-display text-[clamp(2.5rem,5vw,4rem)] text-white mb-5 tracking-tight">
-              Book Your Adventure
-            </h1>
-            <p className="text-white/50 max-w-xl leading-relaxed font-light">
-              Select your dates, group size, and any add-ons. We'll handle the
-              rest.
-            </p>
-          </motion.div>
+    <div ref={containerRef} className="min-h-screen bg-white overflow-hidden">
+      {/* Editorial Hero */}
+      <section className="relative h-[45vh] bg-charcoal flex items-center px-6 sm:px-12 lg:px-24 overflow-hidden pt-12">
+        <motion.div style={{ y, opacity }} className="absolute inset-0 opacity-[0.03] select-none pointer-events-none flex items-center justify-center">
+           <h1 className="text-[6vw] font-display font-bold text-white whitespace-nowrap italic">RESERVE</h1>
+        </motion.div>
 
-          {/* Steps */}
-          <div className="flex items-center gap-6 mt-14">
-            {["Select & Customize", "Your Details", "Confirmation"].map(
-              (s, i) => (
-                <div key={s} className="flex items-center gap-4">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold transition-all duration-500 ${
-                      step > i + 1
-                        ? "bg-teal text-white"
-                        : step === i + 1
-                        ? "bg-amber text-charcoal"
-                        : "bg-white/[0.08] text-white/30"
-                    }`}
-                  >
-                    {step > i + 1 ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      i + 1
-                    )}
-                  </div>
-                  <span
-                    className={`text-[13px] hidden sm:block font-medium transition-colors duration-500 ${
-                      step >= i + 1 ? "text-white" : "text-white/30"
-                    }`}
-                  >
-                    {s}
-                  </span>
-                  {i < 2 && (
-                    <div className="w-10 h-px bg-white/[0.08] hidden sm:block" />
-                  )}
-                </div>
-              )
-            )}
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto">
+          <div className="max-w-3xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-8 h-px bg-amber" />
+                <span className="text-amber font-bold text-[8px] tracking-[0.4em] uppercase">The Reservation Protocol</span>
+              </div>
+              <h1 className="text-white text-huge mb-6 relative">
+                Secure Your <br /> <span className="italic ml-12 text-amber">Timeline.</span>
+              </h1>
+              
+              {/* Step Indicators */}
+              <div className="flex gap-8 items-center mt-6">
+                 {[
+                   { n: 1, label: "Configuration" },
+                   { n: 2, label: "Identity" },
+                   { n: 3, label: "Finalization" }
+                 ].map((stepObj) => (
+                   <div key={stepObj.n} className="flex items-center gap-3 group">
+                      <span className={cn(
+                        "font-display text-2xl italic transition-all duration-700",
+                        step >= stepObj.n ? "text-amber" : "text-white/10"
+                      )}>
+                        0{stepObj.n}
+                      </span>
+                      <span className={cn(
+                        "text-[7px] font-bold tracking-[0.3em] uppercase transition-all duration-700",
+                        step >= stepObj.n ? "text-white/60" : "text-white/5"
+                      )}>
+                        {stepObj.label}
+                      </span>
+                      {stepObj.n < 3 && <div className="w-6 h-px bg-white/10" />}
+                   </div>
+                 ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Content */}
-      <section className="py-14">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Main Form Area */}
+      <section className="py-16 bg-sand/20 relative">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16"
               >
-                {/* Left Column */}
-                <div className="lg:col-span-2 space-y-8">
-                  {/* Calendar */}
-                  <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                    <h2 className="font-display text-xl text-charcoal mb-7 flex items-center gap-2.5 tracking-tight">
-                      <CalendarIcon className="w-5 h-5 text-teal" />
-                      Select Your Date
-                    </h2>
-                    <div className="max-w-sm mx-auto">
-                      <div className="flex items-center justify-between mb-5">
-                        <button
-                          onClick={() =>
-                            setSelectedDate(addDays(currentMonth, -30))
-                          }
-                          className="p-2.5 hover:bg-gray-50 rounded-xl transition-colors"
-                        >
-                          <ArrowRight className="w-4 h-4 rotate-180" />
-                        </button>
-                        <span className="font-display text-lg text-charcoal tracking-tight">
-                          {format(currentMonth, "MMMM yyyy")}
-                        </span>
-                        <button
-                          onClick={() =>
-                            setSelectedDate(addDays(currentMonth, 30))
-                          }
-                          className="p-2.5 hover:bg-gray-50 rounded-xl transition-colors"
-                        >
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {weekDays.map((d) => (
-                          <div
-                            key={d}
-                            className="text-center text-[11px] font-bold text-warm-gray py-2"
-                          >
-                            {d}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-7 gap-1">
-                        {Array.from({ length: days[0].getDay() }).map((_, i) => (
-                          <div key={`empty-${i}`} />
-                        ))}
-                        {days.map((day) => {
-                          const isSelected = isSameDay(day, selectedDate);
-                          const isToday = isSameDay(day, today);
-                          const isPast = isBefore(day, today);
-                          return (
-                            <button
-                              key={day.toISOString()}
-                              onClick={() => !isPast && setSelectedDate(day)}
-                              disabled={isPast}
-                              className={cn(
-                                "aspect-square rounded-lg text-[13px] font-semibold transition-all duration-300",
-                                isSelected
-                                  ? "bg-teal text-white shadow-lg shadow-teal/20"
-                                  : isToday
-                                  ? "bg-amber/15 text-amber font-bold"
-                                  : isPast
-                                  ? "text-gray-200 cursor-not-allowed"
-                                  : "text-charcoal hover:bg-teal/[0.06] hover:text-teal"
-                              )}
-                            >
-                              {format(day, "d")}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <p className="text-center text-[13px] text-warm-gray mt-5">
-                        Selected:{" "}
-                        <span className="font-semibold text-teal">
-                          {format(selectedDate, "EEEE, MMMM do, yyyy")}
-                        </span>
-                      </p>
+                <div className="lg:col-span-8 space-y-12">
+                  {/* Calendar Portfolio - Mobile App Style */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="font-display italic text-amber text-xl">01</span>
+                      <div className="w-6 h-px bg-charcoal/10" />
+                      <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Temporal Selection</span>
                     </div>
-                  </div>
-
-                  {/* Group Size */}
-                  <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                    <h2 className="font-display text-xl text-charcoal mb-7 flex items-center gap-2.5 tracking-tight">
-                      <Users className="w-5 h-5 text-teal" />
-                      Group Size
-                    </h2>
-                    <div className="space-y-7">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-charcoal text-[15px]">
-                            Adults
-                          </div>
-                          <div className="text-[13px] text-warm-gray">
-                            Ages 13+
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={() => setAdults(Math.max(1, adults - 1))}
-                            className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center hover:border-teal hover:text-teal transition-all duration-300"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="w-6 text-center font-bold text-lg">
-                            {adults}
-                          </span>
-                          <button
-                            onClick={() => setAdults(adults + 1)}
-                            className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center hover:border-teal hover:text-teal transition-all duration-300"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-charcoal text-[15px]">
-                            Children
-                          </div>
-                          <div className="text-[13px] text-warm-gray">
-                            Ages 3-12 (50% off)
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={() =>
-                              setChildren(Math.max(0, children - 1))
-                            }
-                            className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center hover:border-teal hover:text-teal transition-all duration-300"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="w-6 text-center font-bold text-lg">
-                            {children}
-                          </span>
-                          <button
-                            onClick={() => setChildren(children + 1)}
-                            className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center hover:border-teal hover:text-teal transition-all duration-300"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Selected Items */}
-                  <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                    <h2 className="font-display text-xl text-charcoal mb-6 tracking-tight">
-                      Selected Experiences
-                    </h2>
-                    <div className="space-y-4">
-                      {selectedItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex gap-4 p-4 bg-sand rounded-xl"
-                        >
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-20 h-20 rounded-xl object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span
-                                className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold tracking-wide ${
-                                  item.type === "safari"
-                                    ? "bg-coral/10 text-coral"
-                                    : "bg-teal/10 text-teal"
-                                }`}
-                              >
-                                {item.type === "safari" ? "Safari" : "Tour"}
-                              </span>
-                            </div>
-                            <h3 className="font-display text-charcoal tracking-tight">
-                              {item.title}
+                    
+                    <div className="bg-white p-6 sm:p-10 shadow-[0_30px_60px_rgba(0,0,0,0.08)] relative overflow-hidden rounded-3xl">
+                       <div className="flex items-center justify-between mb-10">
+                         <div>
+                            <h3 className="text-2xl font-bold text-charcoal font-display italic tracking-tight">
+                              {format(currentMonth, "MMMM yyyy")}
                             </h3>
-                            <div className="flex items-center gap-4 text-[11px] text-warm-gray mt-1.5">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {item.duration}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Star className="w-3 h-3 text-amber fill-current" />
-                                {item.price > 200
-                                  ? "$" + item.price.toLocaleString()
-                                  : "$" + item.price}
-                              </span>
-                            </div>
-                          </div>
+                            <span className="text-[10px] font-bold text-charcoal/20 uppercase tracking-[0.3em]">Select your arrival date</span>
+                         </div>
+                         <div className="flex gap-2">
+                           <button 
+                             onClick={() => setSelectedDate(addDays(currentMonth, -30))} 
+                             className="w-10 h-10 rounded-2xl bg-sand/50 flex items-center justify-center hover:bg-amber hover:text-white transition-all duration-500 hover-trigger"
+                           >
+                             <ChevronLeft className="w-5 h-5" />
+                           </button>
+                           <button 
+                             onClick={() => setSelectedDate(addDays(currentMonth, 30))} 
+                             className="w-10 h-10 rounded-2xl bg-sand/50 flex items-center justify-center hover:bg-amber hover:text-white transition-all duration-500 hover-trigger"
+                           >
+                             <ChevronRight className="w-5 h-5" />
+                           </button>
+                         </div>
+                       </div>
+
+                       <div className="grid grid-cols-7 gap-1">
+                          {weekDays.map(d => (
+                            <div key={d} className="text-center text-[8px] font-bold text-charcoal/20 uppercase tracking-[0.2em] py-4">{d}</div>
+                          ))}
+                          
+                          {Array.from({ length: days[0].getDay() }).map((_, i) => (
+                            <div key={`empty-${i}`} className="aspect-square" />
+                          ))}
+                          
+                          {days.map((day) => {
+                            const isSelected = isSameDay(day, selectedDate);
+                            const isPast = isBefore(day, today);
+                            const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+
+                            return (
+                              <button
+                                key={day.toISOString()}
+                                onClick={() => !isPast && setSelectedDate(day)}
+                                disabled={isPast}
+                                className={cn(
+                                  "aspect-square flex flex-col items-center justify-center rounded-2xl text-sm transition-all duration-500 relative group hover-trigger",
+                                  isSelected 
+                                    ? "bg-amber text-white font-bold shadow-[0_10px_25px_rgba(217,119,6,0.4)] scale-95" 
+                                    : "hover:bg-sand/50 text-charcoal/80",
+                                  isPast ? "opacity-[0.05] cursor-not-allowed" : "",
+                                  !isCurrentMonth ? "opacity-20" : ""
+                                )}
+                              >
+                                <span className={cn(
+                                  "relative z-10",
+                                  isSelected ? "font-display italic text-lg" : ""
+                                )}>
+                                  {format(day, "d")}
+                                </span>
+                                {isSameDay(day, new Date()) && !isSelected && (
+                                  <div className="w-1 h-1 bg-amber rounded-full mt-0.5" />
+                                )}
+                              </button>
+                            );
+                          })}
+                       </div>
+                    </div>
+                  </div>
+
+                  {/* Group Density */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="font-display italic text-amber text-xl">02</span>
+                      <div className="w-6 h-px bg-charcoal/10" />
+                      <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Guest Density</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                      {[
+                        { label: "Adults", sub: "Ages 13+", val: adults, set: setAdults, min: 1 },
+                        { label: "Children", sub: "Ages 3-12", val: children, set: setChildren, min: 0 },
+                      ].map((item) => (
+                        <div key={item.label} className="bg-white p-6 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] flex justify-between items-center group transition-all">
+                           <div>
+                             <h4 className="font-display text-2xl mb-1 group-hover:italic transition-all duration-700">{item.label}</h4>
+                             <span className="text-[8px] font-bold text-charcoal/20 uppercase tracking-[0.3em]">{item.sub}</span>
+                           </div>
+                           <div className="flex items-center gap-5">
+                             <button 
+                               onClick={() => item.set(Math.max(item.min, item.val - 1))} 
+                               className="w-8 h-8 rounded-xl bg-sand flex items-center justify-center text-charcoal/40 hover:text-amber hover:bg-sand/80 transition-all hover-trigger"
+                             >
+                               <Minus className="w-4 h-4" />
+                             </button>
+                             <span className="font-display text-3xl italic w-10 text-center tracking-tighter text-charcoal/80">{item.val}</span>
+                             <button 
+                               onClick={() => item.set(item.val + 1)} 
+                               className="w-8 h-8 rounded-xl bg-sand flex items-center justify-center text-charcoal/40 hover:text-amber hover:bg-sand/80 transition-all hover-trigger"
+                             >
+                               <Plus className="w-4 h-4" />
+                             </button>
+                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column - Summary */}
-                <div className="lg:col-span-1">
-                  <div className="sticky top-24">
-                    <div className="bg-white rounded-2xl p-7 shadow-lg">
-                      <h3 className="font-display text-xl text-charcoal mb-7 tracking-tight">
-                        Booking Summary
-                      </h3>
-
-                      <div className="space-y-3.5 mb-7">
-                        <div className="flex justify-between text-[13px]">
-                          <span className="text-warm-gray">Date</span>
-                          <span className="font-semibold text-charcoal">
-                            {format(selectedDate, "MMM do, yyyy")}
-                          </span>
+                {/* Summary Sidebar */}
+                <div className="lg:col-span-4">
+                  <div className="sticky top-24 bg-white border border-charcoal/5 p-8 space-y-10 shadow-[0_40px_80px_rgba(0,0,0,0.06)] rounded-3xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber/[0.03] blur-3xl rounded-full" />
+                    
+                    <div>
+                      <span className="text-[7px] font-bold tracking-[0.4em] uppercase text-charcoal/30 block mb-6">Your Selection</span>
+                      {selectedItems.map(item => (
+                        <div key={item.id} className="flex gap-4 group mb-5">
+                           <div className="w-14 h-14 bg-sand overflow-hidden shrink-0 shadow-sm rounded-2xl">
+                             <img src={item.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                           </div>
+                           <div>
+                             <h4 className="font-display text-base mb-0.5 italic leading-tight">{item.title}</h4>
+                             <div className="w-4 h-px bg-amber mb-1 opacity-40" />
+                             <span className="text-[7px] font-bold text-charcoal/40 uppercase tracking-[0.3em]">{item.duration}</span>
+                           </div>
                         </div>
-                        <div className="flex justify-between text-[13px]">
-                          <span className="text-warm-gray">Adults</span>
-                          <span className="font-semibold text-charcoal">
-                            {adults}
-                          </span>
-                        </div>
-                        {children > 0 && (
-                          <div className="flex justify-between text-[13px]">
-                            <span className="text-warm-gray">Children</span>
-                            <span className="font-semibold text-charcoal">
-                              {children}
-                            </span>
-                          </div>
-                        )}
-                        <div className="border-t pt-4 mt-4">
-                          <div className="flex justify-between text-[13px]">
-                            <span className="text-warm-gray">Subtotal</span>
-                            <span className="font-semibold text-charcoal">
-                              ${subtotal.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-[13px] mt-2.5">
-                            <span className="text-warm-gray">
-                              Service Fee (5%)
-                            </span>
-                            <span className="font-semibold text-charcoal">
-                              ${serviceFee.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      ))}
+                    </div>
 
-                      <div className="border-t pt-5 mb-7">
-                        <div className="flex justify-between items-baseline">
-                          <span className="font-display text-lg text-charcoal tracking-tight">
-                            Total
-                          </span>
-                          <span className="font-display text-[28px] text-teal tracking-tight">
-                            ${total.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
+                    <div className="border-t border-charcoal/5 pt-8 space-y-4">
+                       <div className="flex justify-between items-center">
+                         <span className="text-charcoal/30 uppercase tracking-[0.25em] text-[8px] font-bold">Departure</span>
+                         <span className="font-display text-base italic text-charcoal/80">{format(selectedDate, "MMM do, yyyy")}</span>
+                       </div>
+                       <div className="flex justify-between items-end pt-4 border-t border-charcoal/5">
+                         <span className="text-charcoal/30 uppercase tracking-[0.25em] text-[8px] font-bold">Total Investment</span>
+                         <div className="text-right">
+                           <span className="font-display text-3xl italic text-amber tracking-tighter">${total.toLocaleString()}</span>
+                           <span className="block text-[6px] font-bold text-charcoal/20 uppercase tracking-widest">Incl. all services</span>
+                         </div>
+                       </div>
+                    </div>
 
-                      <button
-                        onClick={() => setStep(2)}
-                        className="w-full py-4 bg-teal text-white rounded-2xl font-semibold text-sm tracking-wide hover:bg-deep-forest transition-all duration-500 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-teal/20 hover:-translate-y-px"
-                      >
-                        Continue <ArrowRight className="w-4 h-4" />
-                      </button>
-
-                      <div className="flex items-center justify-center gap-5 mt-5 text-[11px] text-warm-gray">
-                        <span className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" /> Secure
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CreditCard className="w-3 h-3" /> SSL Encrypted
-                        </span>
-                      </div>
+                    <button onClick={() => setStep(2)} className="btn-raw w-full !px-0 hover-trigger !py-4 !bg-charcoal !text-white hover:!bg-amber rounded-2xl shadow-lg">
+                      Proceed to Identity
+                    </button>
+                    
+                    <div className="flex items-center justify-center gap-2 text-[7px] font-bold text-charcoal/20 uppercase tracking-[0.3em] pt-2">
+                       <ShieldCheck className="w-3 h-3 text-amber/40" />
+                       Encrypted Transaction
                     </div>
                   </div>
                 </div>
@@ -470,172 +353,73 @@ export default function Booking() {
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="max-w-4xl mx-auto bg-white p-8 sm:p-16 relative overflow-hidden shadow-2xl rounded-[3rem]"
               >
-                <div className="lg:col-span-2">
-                  <form
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded-2xl p-8 lg:p-10 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-7"
-                  >
-                    <h2 className="font-display text-2xl text-charcoal mb-8 tracking-tight">
-                      Traveler Details
-                    </h2>
+                <div className="absolute top-0 right-0 p-8 opacity-[0.015] pointer-events-none select-none">
+                  <h3 className="text-[8vw] font-display text-charcoal leading-none italic uppercase font-bold">Identity</h3>
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                          First Name
-                        </label>
+                <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">First Identity</label>
                         <input
-                          type="text"
-                          required
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, firstName: e.target.value })
-                          }
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 text-[14px]"
-                          placeholder="John"
+                          type="text" required
+                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
+                          placeholder="Julianne"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                          Last Name
-                        </label>
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Last Identity</label>
                         <input
-                          type="text"
-                          required
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, lastName: e.target.value })
-                          }
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 text-[14px]"
-                          placeholder="Doe"
+                          type="text" required
+                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
+                          placeholder="Moore"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                          Email
-                        </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Digital Link</label>
                         <input
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) =>
-                            setFormData({ ...formData, email: e.target.value })
-                          }
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 text-[14px]"
-                          placeholder="john@example.com"
+                          type="email" required
+                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
+                          placeholder="julianne@arch.com"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                          Phone
-                        </label>
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Contact Number</label>
                         <input
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={(e) =>
-                            setFormData({ ...formData, phone: e.target.value })
-                          }
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 text-[14px]"
-                          placeholder="+1 234 567 890"
+                          type="tel" required
+                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
+                          placeholder="+1 ..."
                         />
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                        Country
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.country}
-                        onChange={(e) =>
-                          setFormData({ ...formData, country: e.target.value })
-                        }
-                        className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 text-[14px]"
-                        placeholder="United States"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[13px] font-semibold text-charcoal mb-2.5">
-                        Special Requests
-                      </label>
+                    <div className="space-y-3">
+                      <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Special Requests</label>
                       <textarea
-                        rows={4}
-                        value={formData.specialRequests}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            specialRequests: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3.5 rounded-xl border border-gray-100 focus:border-teal focus:ring-2 focus:ring-teal/10 outline-none transition-all duration-300 resize-none text-[14px]"
-                        placeholder="Dietary requirements, accessibility needs, celebration details..."
+                        rows={3}
+                        className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 resize-none font-display italic rounded-t-xl"
+                        placeholder="Dietary requirements or specific curiosities..."
                       />
                     </div>
 
-                    <div className="flex gap-4 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => setStep(1)}
-                        className="px-7 py-3.5 border-2 border-gray-100 rounded-xl font-semibold text-[13px] text-warm-gray hover:border-teal hover:text-teal transition-all duration-500"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex-1 py-3.5 bg-teal text-white rounded-xl font-semibold text-[13px] tracking-wide hover:bg-deep-forest transition-all duration-500 hover:shadow-lg hover:shadow-teal/20 hover:-translate-y-px"
-                      >
-                        Complete Booking
-                      </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
+                       <button type="button" onClick={() => setStep(1)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/30 hover:text-charcoal transition-all hover-trigger">
+                         ← Configuration
+                       </button>
+                       <button type="submit" className="btn-raw !bg-charcoal !text-white hover:!bg-amber hover-trigger !px-12 !py-4 rounded-2xl shadow-xl">
+                         Finalize Reservation Request
+                       </button>
                     </div>
-                  </form>
-                </div>
-
-                <div className="lg:col-span-1">
-                  <div className="sticky top-24">
-                    <div className="bg-white rounded-2xl p-7 shadow-lg">
-                      <h3 className="font-display text-lg text-charcoal mb-5 tracking-tight">
-                        Booking Summary
-                      </h3>
-                      <div className="space-y-2.5 text-[13px] mb-5">
-                        <div className="flex justify-between">
-                          <span className="text-warm-gray">Date</span>
-                          <span>{format(selectedDate, "MMM do")}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-warm-gray">Adults</span>
-                          <span>{adults}</span>
-                        </div>
-                        {children > 0 && (
-                          <div className="flex justify-between">
-                            <span className="text-warm-gray">Children</span>
-                            <span>{children}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="border-t pt-5">
-                        <div className="flex justify-between items-baseline font-display text-lg">
-                          <span>Total</span>
-                          <span className="text-teal tracking-tight">
-                            ${total.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </form>
               </motion.div>
             )}
 
@@ -644,56 +428,21 @@ export default function Booking() {
                 key="step3"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="max-w-2xl mx-auto text-center py-20"
+                transition={{ duration: 0.8 }}
+                className="max-w-3xl mx-auto text-center py-20 bg-white shadow-2xl rounded-[4rem] px-8 sm:px-16"
               >
-                <div className="w-20 h-20 bg-teal/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                  <Check className="w-10 h-10 text-teal" />
+                <div className="w-20 h-20 bg-amber/10 border border-amber text-amber rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-[0_15px_30px_rgba(217,119,6,0.15)] rotate-12 group-hover:rotate-0 transition-transform duration-700">
+                  <Check className="w-10 h-10" />
                 </div>
-                <h2 className="font-display text-[clamp(2rem,5vw,3rem)] text-charcoal mb-5 tracking-tight">
-                  Booking Confirmed!
-                </h2>
-                <p className="text-warm-gray mb-10 leading-relaxed max-w-md mx-auto">
-                  Thank you, {formData.firstName || "Traveler"}! We've received
-                  your booking request for{" "}
-                  {format(selectedDate, "MMMM do, yyyy")}. Our team will contact
-                  you within 24 hours to finalize the details.
+                <h2 className="text-[7vw] font-display text-charcoal mb-6 italic leading-none tracking-tighter">Transmitted.</h2>
+                <p className="text-charcoal/60 text-xl font-light leading-relaxed mb-12 max-w-lg mx-auto font-display italic">
+                  "Your journey request has been recorded. An architect will contact 
+                  you within the next solar cycle to finalize the details."
                 </p>
-                <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] text-left max-w-md mx-auto mb-10">
-                  <h3 className="font-display text-lg text-charcoal mb-5 tracking-tight">
-                    Booking Details
-                  </h3>
-                  <div className="space-y-3 text-[13px]">
-                    <div className="flex justify-between">
-                      <span className="text-warm-gray">Date</span>
-                      <span className="font-semibold">
-                        {format(selectedDate, "EEEE, MMM do, yyyy")}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-warm-gray">Adults</span>
-                      <span className="font-semibold">{adults}</span>
-                    </div>
-                    {children > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-warm-gray">Children</span>
-                        <span className="font-semibold">{children}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-warm-gray">Total</span>
-                      <span className="font-semibold text-teal">
-                        ${total.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+                   <Link to="/" className="btn-raw hover-trigger !px-10 !py-4 rounded-2xl shadow-lg">Return to Archives</Link>
+                   <Link to="/safaris" className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/30 hover:text-charcoal transition-colors hover-trigger">Explore More Collections</Link>
                 </div>
-                <a
-                  href="/"
-                  className="inline-flex items-center gap-2.5 px-8 py-4 bg-teal text-white rounded-2xl font-semibold text-sm tracking-wide hover:bg-deep-forest transition-all duration-500 hover:shadow-lg hover:shadow-teal/20 hover:-translate-y-px"
-                >
-                  Back to Home
-                </a>
               </motion.div>
             )}
           </AnimatePresence>
