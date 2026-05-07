@@ -1,45 +1,29 @@
-import { motion } from "framer-motion";
-import { Compass, Heart, Globe, Award, Users, TreePine } from "lucide-react";
-
-const team = [
-  {
-    name: "Omar Juma",
-    role: "Founder & Lead Guide",
-    bio: "Born and raised in Stone Town, Omar has been guiding visitors through Zanzibar's secrets for over 15 years. His encyclopedic knowledge of local history and wildlife is matched only by his warmth and storytelling ability.",
-  },
-  {
-    name: "Fatima Hassan",
-    role: "Operations Director",
-    bio: "Fatima ensures every detail of your journey is flawless. From hotel pickups to dietary requirements, she orchestrates the behind-the-scenes magic that makes ZanTrica experiences seamless.",
-  },
-  {
-    name: "David Mwinyi",
-    role: "Safari Specialist",
-    bio: "A certified field guide with over a decade of experience in Tanzania's national parks, David has an uncanny ability to find the Big Five and read animal behavior like no one else.",
-  },
-];
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { Compass, Heart, Globe, Award, Users, TreePine, MoveRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const values = [
   {
-    icon: Heart,
+    label: "01",
     title: "Passion First",
     description:
       "We started ZanTrica because we love sharing our home. Every tour is crafted with genuine care and enthusiasm.",
   },
   {
-    icon: Globe,
+    label: "02",
     title: "Sustainable Travel",
     description:
       "We partner with local communities, support conservation efforts, and ensure our impact on this beautiful land is positive.",
   },
   {
-    icon: Award,
+    label: "03",
     title: "Excellence Always",
     description:
       "From our vehicles to our guides to our accommodation partners, we accept only the highest standards.",
   },
   {
-    icon: TreePine,
+    label: "04",
     title: "Protecting Nature",
     description:
       "A portion of every booking goes directly to wildlife conservation and community development projects.",
@@ -47,223 +31,225 @@ const values = [
 ];
 
 export default function About() {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, 600]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
+
   return (
-    <div className="min-h-screen bg-sand">
-      {/* Hero */}
-      <section className="relative h-[55vh] min-h-[450px] overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=1920&q=80"
-          alt="About ZanTrica"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/70 via-charcoal/30 to-charcoal/80" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div ref={containerRef} className="min-h-screen bg-white overflow-hidden">
+      {/* Editorial Hero */}
+      <section className="relative h-screen bg-charcoal flex items-center px-6 sm:px-12 lg:px-24 overflow-hidden">
+        <motion.div style={{ y, scale, opacity }} className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=1920&q=80"
+            alt="Human connection in the Tanzanian wilderness"
+            loading="lazy"
+            className="w-full h-full object-cover grayscale-[30%] brightness-75"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-transparent to-charcoal" />
+        </motion.div>
+
+        <div className="relative z-10 w-full max-w-[1800px] mx-auto pt-20">
+          <div className="max-w-5xl">
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="text-amber font-semibold text-[11px] tracking-[0.2em] uppercase mb-4 block">
-                Our Story
-              </span>
-              <h1 className="font-display text-[clamp(3rem,7vw,5.5rem)] text-white mb-5 tracking-tight leading-[1.05]">
-                About ZanTrica
+              <div className="flex items-center gap-8 mb-16">
+                <div className="w-16 h-px bg-amber" />
+                <span className="text-amber font-bold text-[10px] tracking-[0.6em] uppercase">The Manifesto</span>
+              </div>
+              <h1 className="text-white text-huge leading-[0.7] tracking-tighter mb-20 relative mix-blend-difference">
+                Human <br /> <span className="italic ml-24 text-amber">Connection.</span>
               </h1>
-              <p className="text-lg text-white/60 max-w-xl leading-relaxed font-light">
-                A story of passion, place, and the belief that travel should
-                transform both visitor and visited.
+              <p className="text-white/60 text-editorial max-w-2xl leading-relaxed italic">
+                "Founded on the belief that travel is an art form, a narrative 
+                between the explorer and the ancient rhythms of Tanzania."
               </p>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Story */}
-      <section className="py-28">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <h2 className="font-display text-[clamp(2rem,4vw,3rem)] text-charcoal mb-8 tracking-tight leading-[1.1]">
-                From a Single Dhow to
-                <span className="block text-amber italic font-light mt-1">
-                  a Family of Explorers
-                </span>
+      {/* Origin Story */}
+      <section className="py-60 bg-white relative">
+        <div className="max-w-[1800px] mx-auto px-6 sm:px-12 lg:px-24">
+          <div className="grid grid-cols-12 gap-12 lg:gap-24 items-start">
+            <div className="col-span-12 lg:col-span-5">
+              <div className="flex items-center gap-6 mb-12">
+                <span className="font-display italic text-amber text-3xl">01</span>
+                <div className="w-12 h-px bg-charcoal/10" />
+                <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/30">The Origin</span>
+              </div>
+              <h2 className="text-huge text-charcoal mb-20 leading-[0.8] tracking-tighter">
+                From a Single Dhow <br /><span className="italic ml-24 text-amber">to a Legacy.</span>
               </h2>
-              <div className="space-y-5 text-warm-gray leading-[1.85] text-[15px]">
-                <p>
-                  ZanTrica began in 2015 when Omar Juma, a third-generation Stone
-                  Town resident, decided to share his island with the world—not as
-                  a tourist destination, but as a living, breathing home.
+              <div className="space-y-12 text-charcoal/70 text-2xl font-light leading-relaxed font-display italic">
+                <p className="first-letter:text-7xl first-letter:font-bold first-letter:text-charcoal first-letter:mr-4 first-letter:float-left first-letter:leading-[0.8]">
+                  ZanTrica began in 2015 when Omar Juma decided to share his island 
+                  with the world—not as a tourist destination, but as a living, 
+                  breathing home.
                 </p>
                 <p>
-                  What started as sunset dhow cruises for friends grew into
-                  something much larger. Today, we're a team of 24 passionate
-                  locals who believe that the best travel experiences come from
-                  genuine connection—to the land, the wildlife, and the people who
-                  call this place home.
-                </p>
-                <p>
-                  We've hosted over 15,000 guests from 45 countries, but we still
-                  approach every booking as if it's our first. Because for us, this
-                  isn't just business. It's our life's work.
+                  What started as sunset cruises for friends grew into a family of 
+                  explorers. Today, we are a team of 24 passionate locals who 
+                  believe that the best experiences come from genuine intimacy 
+                  with the land and its people.
                 </p>
               </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="grid grid-cols-2 gap-5"
-            >
-              <div className="space-y-5">
-                <div className="aspect-[3/4] rounded-2xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=600&q=80"
-                    alt="Stone Town"
-                    className="w-full h-full object-cover"
-                  />
+            </div>
+            
+            <div className="lg:col-span-7 mt-20 lg:mt-32">
+              <div className="relative">
+                 {/* Large Background Text */}
+                <div className="absolute -top-32 -right-32 text-[15vw] font-display text-charcoal/[0.02] whitespace-nowrap italic pointer-events-none select-none z-0">
+                  Zanzibar
                 </div>
-                <div className="bg-teal rounded-2xl p-7 text-white">
-                  <div className="font-display text-4xl mb-1 tracking-tight">9+</div>
-                  <div className="text-[13px] text-white/70">Years of Excellence</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 2 }}
+                    className="aspect-[3/4] bg-sand overflow-hidden shadow-2xl hover-trigger"
+                  >
+                    <motion.img 
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 3 }}
+                      src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1000&q=80" 
+                      className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-[2000ms]"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3, duration: 2 }}
+                    className="aspect-[3/4] bg-sand overflow-hidden md:mt-40 shadow-2xl hover-trigger"
+                  >
+                    <motion.img 
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 3 }}
+                      src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1000&q=80" 
+                      className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-[2000ms]"
+                    />
+                  </motion.div>
                 </div>
               </div>
-              <div className="space-y-5 pt-10">
-                <div className="bg-amber rounded-2xl p-7 text-charcoal">
-                  <div className="font-display text-4xl mb-1 tracking-tight">15K+</div>
-                  <div className="text-[13px] text-charcoal/60">Happy Travelers</div>
-                </div>
-                <div className="aspect-[3/4] rounded-2xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=600&q=80"
-                    alt="Safari"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-28 bg-cream relative">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="text-teal font-semibold text-[11px] tracking-[0.2em] uppercase mb-4 block"
-            >
-              What We Believe
-            </motion.span>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                delay: 0.1,
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="font-display text-[clamp(2rem,4vw,3rem)] text-charcoal tracking-tight"
-            >
-              Our Values
-            </motion.h2>
+      {/* Values - Editorial List */}
+      <section className="py-60 bg-charcoal relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-white/[0.02] -skew-x-12 translate-x-1/2" />
+        
+        <div className="max-w-[1800px] mx-auto px-6 sm:px-12 lg:px-24 relative z-10">
+          <div className="flex items-center gap-6 mb-24">
+            <span className="font-display italic text-amber text-3xl">02</span>
+            <div className="w-12 h-px bg-white/10" />
+            <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-white/30">The Belief System</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
-            {values.map((value, i) => (
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-40 gap-y-12">
+            {values.map((v, i) => (
               <motion.div
-                key={value.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={v.label}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{
-                  delay: i * 0.1,
-                  duration: 0.9,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg hover:shadow-charcoal/5 transition-all duration-700 group"
+                transition={{ delay: i * 0.1, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                className="group py-16 border-b border-white/5 hover:border-amber/30 transition-all duration-700"
               >
-                <div className="w-11 h-11 rounded-xl bg-teal/[0.06] flex items-center justify-center mb-6 group-hover:bg-teal transition-all duration-500">
-                  <value.icon className="w-5 h-5 text-teal group-hover:text-white transition-colors duration-500" />
+                <div className="flex items-baseline gap-12">
+                  <span className="font-display text-5xl italic text-amber/20 group-hover:text-amber transition-all duration-700">
+                    {v.label}
+                  </span>
+                  <div>
+                    <h3 className="text-white text-6xl font-display mb-8 group-hover:italic transition-all duration-700 tracking-tight">
+                      {v.title}
+                    </h3>
+                    <p className="text-white/40 text-xl font-light leading-relaxed max-w-xl font-display italic">
+                      "{v.description}"
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-display text-xl text-charcoal mb-3 tracking-tight">
-                  {value.title}
-                </h3>
-                <p className="text-[13px] text-warm-gray leading-[1.75]">
-                  {value.description}
-                </p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Team */}
-      <section className="py-28">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="text-coral font-semibold text-[11px] tracking-[0.2em] uppercase mb-4 block"
-            >
-              The People
-            </motion.span>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                delay: 0.1,
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="font-display text-[clamp(2rem,4vw,3rem)] text-charcoal tracking-tight"
-            >
-              Meet Our Team
-            </motion.h2>
+      {/* Team - Portfolio Style */}
+      <section className="py-60 bg-white">
+        <div className="max-w-[1800px] mx-auto px-6 sm:px-12 lg:px-24">
+          <div className="text-center mb-40">
+             <div className="flex items-center justify-center gap-6 mb-12">
+                <div className="w-12 h-px bg-charcoal/10" />
+                <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/20">The Collective</span>
+                <div className="w-12 h-px bg-charcoal/10" />
+             </div>
+             <h2 className="text-large text-charcoal leading-[0.8] tracking-tighter">The Curators <br /><span className="italic ml-24 text-amber">of the Wild.</span></h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, i) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-24 lg:gap-40">
+            {[
+              { name: "Omar Juma", role: "Founder", img: "https://i.pravatar.cc/600?img=68" },
+              { name: "Fatima Hassan", role: "Operations", img: "https://i.pravatar.cc/600?img=45" },
+              { name: "David Mwinyi", role: "Safari Lead", img: "https://i.pravatar.cc/600?img=11" },
+            ].map((m, i) => (
               <motion.div
-                key={member.name}
-                initial={{ opacity: 0, y: 40 }}
+                key={m.name}
+                initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{
-                  delay: i * 0.1,
-                  duration: 0.9,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="bg-white rounded-2xl p-9 shadow-[0_1px_3px_rgba(0,0,0,0.04)] text-center hover:shadow-lg hover:shadow-charcoal/5 transition-all duration-700"
+                transition={{ delay: i * 0.2, duration: 1.5 }}
+                className="group text-center hover-trigger"
               >
-                <div className="w-16 h-16 rounded-full bg-teal/[0.06] flex items-center justify-center mx-auto mb-7">
-                  <Users className="w-7 h-7 text-teal" />
+                <div className="aspect-[4/5] bg-sand overflow-hidden mb-12 shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-[2000ms] relative">
+                  <motion.img 
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 3 }}
+                    src={m.img} 
+                    alt={m.name} 
+                    className="w-full h-full object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-charcoal/10 mix-blend-overlay group-hover:bg-transparent transition-colors duration-1000" />
                 </div>
-                <h3 className="font-display text-xl text-charcoal mb-1 tracking-tight">
-                  {member.name}
-                </h3>
-                <p className="text-teal text-[13px] font-semibold mb-5 tracking-wide">
-                  {member.role}
-                </p>
-                <p className="text-[13px] text-warm-gray leading-[1.8]">
-                  {member.bio}
-                </p>
+                <h4 className="font-display text-4xl text-charcoal mb-4 group-hover:italic transition-all duration-700">{m.name}</h4>
+                <div className="w-8 h-px bg-amber mx-auto mb-4" />
+                <span className="text-[9px] font-bold tracking-[0.5em] uppercase text-charcoal/20">{m.role}</span>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-80 bg-sand/30 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none select-none flex items-center justify-center">
+           <span className="text-[20vw] font-display font-bold italic -rotate-12">JOURNEY</span>
+        </div>
+        
+        <div className="max-w-[1400px] mx-auto px-6 text-center relative z-10">
+          <h2 className="text-large text-charcoal leading-[0.8] tracking-tighter mb-24">Join the <br /><span className="italic ml-32 text-amber">Narrative.</span></h2>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-16">
+             <Link to="/safaris" className="btn-raw hover-trigger">Explore Collection</Link>
+             <Link to="/contact" className="group flex items-center gap-8 text-charcoal hover-trigger">
+                <span className="font-display text-5xl border-b border-charcoal pb-4 italic transition-all group-hover:translate-x-4">Start a Story</span>
+                <div className="w-16 h-16 rounded-full bg-charcoal text-white flex items-center justify-center group-hover:bg-amber group-hover:text-charcoal transition-all duration-1000">
+                  <MoveRight className="w-8 h-8" />
+                </div>
+              </Link>
           </div>
         </div>
       </section>

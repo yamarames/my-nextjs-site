@@ -6,6 +6,7 @@ import {
   Mail,
   Instagram,
   Facebook,
+  Twitter,
   ArrowUp,
   ArrowUpRight,
 } from "lucide-react";
@@ -16,146 +17,121 @@ export default function Footer() {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="bg-charcoal text-white/70 relative overflow-hidden">
+    <footer className="bg-charcoal text-white/70 relative overflow-hidden pt-32 pb-16">
       {/* Subtle top gradient */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-white/5" />
+      
+      {/* Massive Background Logo - Subtle */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.015] pointer-events-none select-none">
+        <span className="text-[12vw] font-display font-bold leading-none italic">ZT</span>
+      </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12">
-          {/* Brand */}
-          <div className="lg:col-span-4 space-y-6">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 rounded-lg bg-teal flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-                <Compass className="w-[18px] h-[18px] text-white" />
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
+          {/* Brand & Manifesto */}
+          <div className="lg:col-span-5 space-y-10">
+            <Link to="/" className="group flex items-center gap-4 hover-trigger">
+              <div className="w-10 h-10 bg-white text-charcoal flex items-center justify-center font-bold text-lg rotate-45 group-hover:rotate-0 transition-transform duration-700">
+                <span className="-rotate-45 group-hover:rotate-0 transition-transform duration-700">Z</span>
               </div>
-              <div className="flex flex-col">
-                <span className="font-display text-[22px] font-semibold text-white leading-none tracking-tight">
-                  ZanTrica
-                </span>
-                <span className="text-[9px] font-body tracking-[0.25em] uppercase text-white/40 leading-none mt-0.5">
-                  Tours & Safaris
-                </span>
-              </div>
+              <span className="font-display text-3xl text-white tracking-tighter">
+                Zan<span className="italic font-light">Trica</span>
+              </span>
             </Link>
-            <p className="text-sm leading-[1.75] text-white/45 max-w-xs">
-              Crafting unforgettable journeys through Zanzibar's spice-scented
-              alleys and Tanzania's wild heart since 2015. Your adventure begins
-              here.
-            </p>
-            <div className="flex gap-2.5">
+            
+            <h4 className="text-2xl text-white/40 font-display italic leading-snug max-w-sm">
+              "We strip away the noise of mass tourism to reveal the soul of Tanzania."
+            </h4>
+
+            <div className="flex gap-8">
               {[
-                { icon: Instagram, label: "Instagram" },
-                { icon: Facebook, label: "Facebook" },
+                { icon: Instagram, label: "Instagram", url: "https://instagram.com/zantrica" },
+                { icon: Facebook, label: "Facebook", url: "https://facebook.com/zantrica" },
+                { icon: Twitter, label: "Twitter", url: "https://twitter.com/zantrica" },
               ].map((social) => (
                 <a
                   key={social.label}
-                  href="#"
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-teal transition-all duration-500 group"
+                  className="text-white/30 hover:text-amber transition-colors duration-500 hover-trigger"
                 >
-                  <social.icon className="w-[15px] h-[15px] text-white/50 group-hover:text-white transition-colors duration-300" />
+                  <social.icon className="w-5 h-5" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="lg:col-span-2 lg:col-start-6">
-            <h4 className="font-display text-lg text-white mb-6 tracking-wide">
-              Navigate
-            </h4>
-            <ul className="space-y-3.5">
-              {[
-                { label: "Home", href: "/" },
-                { label: "Zanzibar Tours", href: "/tours" },
-                { label: "Tanzania Safaris", href: "/safaris" },
-                { label: "About Us", href: "/about" },
-                { label: "Contact", href: "/contact" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="group inline-flex items-center gap-1 text-sm text-white/45 hover:text-amber transition-colors duration-300"
-                  >
-                    {link.label}
-                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-px translate-x-px group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-300" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Navigation Columns */}
+          <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 lg:gap-20">
+              <div>
+                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Expeditions</span>
+                <ul className="space-y-4">
+                  {["The Collection", "Private Safaris", "Day Excursions", "The Migration"].map((item) => (
+                    <li key={item}>
+                      <Link to="/safaris" className="text-white/40 hover:text-white transition-colors font-display text-xl italic hover-trigger">
+                        {item}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Experiences */}
-          <div className="lg:col-span-2">
-            <h4 className="font-display text-lg text-white mb-6 tracking-wide">
-              Experiences
-            </h4>
-            <ul className="space-y-3.5">
-              {[
-                "Spice Tour",
-                "Mnemba Snorkeling",
-                "Serengeti Migration",
-                "Kilimanjaro Trek",
-                "Sunset Dhow Cruise",
-              ].map((item) => (
-                <li key={item}>
-                  <span className="text-sm text-white/45 hover:text-amber transition-colors duration-300 cursor-pointer">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+              <div>
+                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Inquiry</span>
+                <ul className="space-y-4">
+                  {["About Us", "Contact", "Booking Info", "Privacy Policy"].map((item) => (
+                    <li key={item}>
+                      <Link to="/about" className="text-white/40 hover:text-white transition-colors font-display text-xl italic hover-trigger">
+                        {item}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Contact */}
-          <div className="lg:col-span-3">
-            <h4 className="font-display text-lg text-white mb-6 tracking-wide">
-              Contact Us
-            </h4>
-            <ul className="space-y-5">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-amber mt-0.5 shrink-0" />
-                <span className="text-sm text-white/45 leading-relaxed">
-                  123 Kenyatta Road, Stone Town
-                  <br />
-                  Zanzibar, Tanzania
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-amber shrink-0" />
-                <a
-                  href="tel:+255123456789"
-                  className="text-sm text-white/45 hover:text-amber transition-colors duration-300"
-                >
-                  +255 123 456 789
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-amber shrink-0" />
-                <a
-                  href="mailto:hello@zantrica.com"
-                  className="text-sm text-white/45 hover:text-amber transition-colors duration-300"
-                >
-                  hello@zantrica.com
-                </a>
-              </li>
-            </ul>
+              <div>
+                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Offices</span>
+                <div className="space-y-6 text-white/40 text-[11px] font-light leading-relaxed uppercase tracking-widest">
+                  <p>
+                    <span className="block text-amber mb-2 italic font-display normal-case tracking-normal text-sm">Zanzibar</span>
+                    Hurumzi St, Stone Town<br />
+                    The Spice Island
+                  </p>
+                  <p>
+                    <span className="block text-amber mb-2 italic font-display normal-case tracking-normal text-sm">Arusha</span>
+                    Njiro Road, Kijenge<br />
+                    The Safari Capital
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="py-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-white/25 tracking-wide">
-            &copy; {new Date().getFullYear()} ZanTrica Tours & Safaris. All
-            rights reserved.
-          </p>
+        <div className="mt-32 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-12">
+             <p className="text-[9px] font-bold tracking-[0.4em] text-white/10 uppercase">
+              © {new Date().getFullYear()} Zantrica Explorations
+            </p>
+            <div className="hidden sm:flex gap-10 text-[9px] font-bold tracking-widest text-white/20 uppercase">
+              <span className="hover:text-white cursor-pointer transition-colors hover-trigger">English</span>
+              <span className="hover:text-white cursor-pointer transition-colors hover-trigger">Swahili</span>
+            </div>
+          </div>
+          
           <motion.button
             onClick={scrollToTop}
-            whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.92 }}
-            className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center hover:bg-teal transition-colors duration-500 group"
+            whileHover={{ y: -5 }}
+            className="group flex items-center gap-4 text-white/40 hover:text-white transition-colors hover-trigger"
           >
-            <ArrowUp className="w-4 h-4 text-white/40 group-hover:text-white transition-colors duration-300" />
+            <span className="text-[9px] font-bold tracking-[0.4em] uppercase">Back to Top</span>
+            <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-charcoal transition-all duration-700">
+              <ArrowUp className="w-4 h-4" />
+            </div>
           </motion.button>
         </div>
       </div>

@@ -1,215 +1,175 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Compass } from "lucide-react";
+import { Menu, X, Compass, ArrowRight } from "lucide-react";
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Tours", href: "/tours" },
-  { label: "Safaris", href: "/safaris" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { name: "Collection", path: "/safaris", label: "01" },
+  { name: "Day Trips", path: "/tours", label: "02" },
+  { name: "About", path: "/about", label: "03" },
+  { name: "Contact", path: "/contact", label: "04" },
 ];
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrolled(currentScrollY > 40);
-      if (currentScrollY > lastScrollY && currentScrollY > 200) {
-        setHidden(true);
-      } else {
-        setHidden(false);
-      }
-      setLastScrollY(currentScrollY);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
-
-  const isHome = location.pathname === "/";
+    setIsOpen(false);
+  }, [location]);
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: hidden ? -100 : 0 }}
-        transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-          scrolled
-            ? "bg-sand/90 backdrop-blur-2xl shadow-[0_1px_40px_-12px_rgba(0,0,0,0.08)]"
-            : isHome
-            ? "bg-transparent"
-            : "bg-sand/90 backdrop-blur-2xl"
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-1000 ${
+          scrolled ? "bg-white/90 backdrop-blur-xl border-b border-charcoal/5 py-4" : "bg-transparent py-8"
         }`}
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[72px]">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-500 ${
-                  scrolled || !isHome
-                    ? "bg-teal"
-                    : "bg-white/15 backdrop-blur-md border border-white/20"
-                }`}
-              >
-                <Compass
-                  className={`w-[18px] h-[18px] text-white transition-transform duration-500 group-hover:rotate-45`}
-                />
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className={`font-display text-[22px] font-semibold leading-none tracking-tight transition-colors duration-500 ${
-                    scrolled || !isHome ? "text-charcoal" : "text-white"
-                  }`}
-                >
-                  ZanTrica
-                </span>
-                <span
-                  className={`text-[9px] font-body tracking-[0.25em] uppercase leading-none mt-0.5 transition-colors duration-500 ${
-                    scrolled || !isHome
-                      ? "text-warm-gray/70"
-                      : "text-white/70"
-                  }`}
-                >
-                  Tours & Safaris
-                </span>
-              </div>
-            </Link>
-
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`relative px-4 py-2 text-[13px] font-medium transition-colors duration-300 rounded-lg ${
-                    location.pathname === link.href
-                      ? scrolled || !isHome
-                        ? "text-teal"
-                        : "text-white"
-                      : scrolled || !isHome
-                      ? "text-charcoal/60 hover:text-charcoal hover:bg-charcoal/[0.04]"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                  {location.pathname === link.href && (
-                    <motion.div
-                      layoutId="nav-indicator"
-                      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${
-                        scrolled || !isHome ? "bg-teal" : "bg-white"
-                      }`}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                </Link>
-              ))}
+        <div className="max-w-[1800px] mx-auto px-6 sm:px-12 flex items-center justify-between">
+          <Link to="/" className="group flex items-center gap-4 relative z-[60] hover-trigger">
+            <div className="w-10 h-10 bg-charcoal text-white flex items-center justify-center font-bold text-lg rotate-45 group-hover:rotate-0 transition-transform duration-700">
+              <span className="-rotate-45 group-hover:rotate-0 transition-transform duration-700">Z</span>
             </div>
+            <span className={`font-display text-huge !text-3xl tracking-tighter ${!scrolled && !isOpen ? "text-white" : "text-charcoal"} transition-colors duration-700`}>
+              Zan<span className="italic font-light">Trica</span>
+            </span>
+          </Link>
 
-            <div className="hidden lg:flex items-center gap-3">
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-16">
+            {navLinks.map((link) => (
               <Link
-                to="/booking"
-                className={`px-5 py-2.5 rounded-xl text-[13px] font-semibold tracking-wide transition-all duration-500 ${
-                  scrolled || !isHome
-                    ? "bg-teal text-white hover:bg-deep-forest hover:shadow-lg hover:shadow-teal/20 hover:-translate-y-px"
-                    : "bg-white/15 backdrop-blur-md text-white hover:bg-white/25 border border-white/20 hover:-translate-y-px"
-                }`}
+                key={link.name}
+                to={link.path}
+                className={`relative group text-[10px] font-bold tracking-[0.4em] uppercase hover-trigger ${
+                  !scrolled ? "text-white/60 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+                } transition-colors duration-500`}
               >
-                Book Now
+                <span className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 text-[8px] text-amber italic font-display">
+                  {link.label}
+                </span>
+                {link.name}
               </Link>
+            ))}
+            <Link to="/booking" className="btn-raw !py-4 !px-10 text-[10px] hover-trigger">
+              Inquire
+            </Link>
+          </div>
+
+          {/* Menu Trigger */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="relative z-[60] flex items-center gap-6 group hover-trigger"
+          >
+            <span className={`text-[10px] font-bold tracking-[0.4em] uppercase hidden sm:block ${
+              !scrolled && !isOpen ? "text-white/40" : "text-charcoal/40"
+            }`}>
+              {isOpen ? "Close" : "Menu"}
+            </span>
+            <div className="relative w-10 h-6 flex flex-col justify-center gap-1.5 overflow-hidden">
+              <span className={`w-full h-px transition-all duration-700 ${
+                isOpen ? "rotate-45 translate-y-[4px]" : ""
+              } ${!scrolled && !isOpen ? "bg-white" : "bg-charcoal"}`} />
+              <span className={`w-full h-px transition-all duration-700 ${
+                isOpen ? "-rotate-45 -translate-y-[3px]" : ""
+              } ${!scrolled && !isOpen ? "bg-white" : "bg-charcoal"}`} />
+            </div>
+          </button>
+        </div>
+      </nav>
+
+      {/* Fullscreen Overlay Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ y: "-100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100%" }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[55] bg-white flex flex-col lg:flex-row overflow-hidden"
+          >
+            {/* Massive Background text */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+              <span className="text-[15vw] font-display font-bold leading-none italic">MENU</span>
             </div>
 
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className={`lg:hidden p-2.5 rounded-xl transition-all duration-300 ${
-                scrolled || !isHome
-                  ? "text-charcoal hover:bg-charcoal/5"
-                  : "text-white hover:bg-white/10"
-              }`}
-            >
-              {mobileOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </motion.nav>
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-40 bg-sand"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-              className="pt-28 px-8"
-            >
-              <div className="flex flex-col gap-1">
+            {/* Left: Menu Links */}
+            <div className="flex-1 flex flex-col justify-center px-6 sm:px-24 py-32 border-r border-charcoal/5 relative z-10">
+              <div className="space-y-2">
                 {navLinks.map((link, i) => (
                   <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: -30 }}
+                    key={link.name}
+                    initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: i * 0.06,
-                      duration: 0.5,
-                      ease: [0.32, 0.72, 0, 1],
-                    }}
+                    transition={{ delay: 0.4 + i * 0.1, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <Link
-                      to={link.href}
-                      className={`block py-4 text-3xl font-display border-b border-charcoal/[0.06] transition-colors ${
-                        location.pathname === link.href
-                          ? "text-teal"
-                          : "text-charcoal/80 hover:text-teal"
-                      }`}
+                      to={link.path}
+                      className="group flex items-baseline gap-12 hover-trigger"
                     >
-                      {link.label}
+                      <span className="font-display text-2xl italic text-amber">{link.label}</span>
+                      <span className="font-display text-5xl sm:text-7xl text-charcoal tracking-tighter transition-all duration-1000 group-hover:italic group-hover:translate-x-4">
+                        {link.name}
+                      </span>
                     </Link>
                   </motion.div>
                 ))}
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    delay: navLinks.length * 0.06,
-                    duration: 0.5,
-                    ease: [0.32, 0.72, 0, 1],
-                  }}
-                  className="pt-6"
-                >
-                  <Link
-                    to="/booking"
-                    className="block w-full py-4 text-center bg-teal text-white rounded-2xl text-lg font-semibold tracking-wide hover:bg-deep-forest transition-colors"
-                  >
-                    Book Your Adventure
-                  </Link>
-                </motion.div>
               </div>
-            </motion.div>
+            </div>
+
+            {/* Right: Featured / Contact Info */}
+            <div className="w-full lg:w-1/3 bg-sand/30 p-24 hidden lg:flex flex-col justify-between relative z-10">
+              <div className="space-y-32">
+                <div>
+                  <span className="block text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/20 mb-12">Boutique Offices</span>
+                  <div className="space-y-16">
+                    <div>
+                      <h4 className="font-display text-4xl mb-6 italic">Zanzibar</h4>
+                      <p className="text-base text-charcoal/50 leading-relaxed font-light">
+                        Hurumzi St, Stone Town<br />
+                        The Spice Island
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-display text-4xl mb-6 italic">Arusha</h4>
+                      <p className="text-base text-charcoal/50 leading-relaxed font-light">
+                        Njiro Road, Kijenge<br />
+                        The Safari Capital
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-8">
+                   <span className="block text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/20 mb-12">Social Connect</span>
+                   <div className="flex gap-12">
+                     {[
+                       { name: "Instagram", url: "https://instagram.com/zantrica" },
+                       { name: "Facebook", url: "https://facebook.com/zantrica" },
+                       { name: "Twitter", url: "https://twitter.com/zantrica" }
+                     ].map(s => (
+                       <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" className="text-charcoal hover:text-amber transition-colors font-display text-2xl italic hover-trigger">{s.name}</a>
+                     ))}
+                   </div>
+                </div>
+              </div>
+
+              <div className="pt-20 border-t border-charcoal/10">
+                <Link to="/booking" className="group flex items-center justify-between text-charcoal hover-trigger">
+                  <span className="font-display text-3xl italic">Start Your Story</span>
+                  <div className="w-12 h-12 rounded-full border border-charcoal/10 flex items-center justify-center group-hover:bg-charcoal group-hover:text-white transition-all duration-700">
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                </Link>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

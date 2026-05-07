@@ -1,33 +1,38 @@
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   MapPin,
-  CalendarDays,
   Users,
   Star,
-  Check,
-  X,
   ArrowLeft,
   Clock,
+  MoveRight,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { getSafariById } from "@/data/safaris";
+import { useRef } from "react";
 
 export default function SafariDetail() {
   const { id } = useParams<{ id: string }>();
   const safari = getSafariById(id || "");
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, 400]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
   if (!safari) {
     return (
-      <div className="min-h-screen bg-sand flex items-center justify-center pt-[72px]">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="font-display text-3xl text-charcoal mb-5 tracking-tight">
-            Safari Not Found
-          </h1>
-          <Link
-            to="/safaris"
-            className="text-teal font-semibold inline-flex items-center gap-2 text-sm hover:gap-3 transition-all duration-500"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Safaris
+          <h1 className="text-large text-charcoal mb-8 tracking-tighter italic">Lost in the wild.</h1>
+          <Link to="/safaris" className="btn-raw-outline hover-trigger">
+            Return to Collection
           </Link>
         </div>
       </div>
@@ -35,283 +40,191 @@ export default function SafariDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-sand pt-[72px]">
-      {/* Hero */}
-      <section className="relative h-[70vh] min-h-[550px] overflow-hidden">
-        <img
-          src={safari.image}
-          alt={safari.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/50 via-transparent to-charcoal/80" />
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full pb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+    <div ref={containerRef} className="min-h-screen bg-white overflow-hidden">
+      {/* Editorial Hero */}
+      <section className="relative h-[80vh] bg-charcoal flex items-center px-6 sm:px-12 lg:px-24 overflow-hidden pt-16">
+        <motion.div style={{ y, scale, opacity }} className="absolute inset-0">
+          <img
+            src={safari.image}
+            alt={safari.title}
+            className="w-full h-full object-cover grayscale-[30%] brightness-75"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-transparent to-charcoal" />
+        </motion.div>
+
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-3xl"
+          >
+            <Link
+              to="/safaris"
+              className="group inline-flex items-center gap-4 text-white/50 hover:text-white text-[8px] font-bold tracking-[0.4em] uppercase mb-10 transition-all hover-trigger"
             >
-              <Link
-                to="/safaris"
-                className="group inline-flex items-center gap-2 text-white/70 hover:text-white text-[13px] mb-7 transition-colors duration-500"
-              >
-                <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
-                All Safaris
-              </Link>
-              <div className="flex flex-wrap gap-2.5 mb-4">
-                {safari.parks.map((park) => (
-                  <span
-                    key={park}
-                    className="px-3.5 py-1.5 bg-teal/80 backdrop-blur-xl rounded-full text-[11px] font-medium text-white tracking-wide"
-                  >
-                    {park}
-                  </span>
-                ))}
-              </div>
-              <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] text-white mb-4 tracking-tight leading-[1.05]">
-                {safari.title}
-              </h1>
-              <p className="text-xl text-white/60 max-w-2xl leading-relaxed font-light">
-                {safari.subtitle}
-              </p>
-            </motion.div>
-          </div>
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1.5 transition-transform" />
+              Archives / {safari.location}
+            </Link>
+            
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-8 h-px bg-amber" />
+              <span className="text-amber font-bold text-[7px] tracking-[0.3em] uppercase">Expedition Report No. {safari.id.slice(-2).toUpperCase()}</span>
+            </div>
+
+            <h1 className="text-white text-[clamp(2.2rem,6vw,4rem)] leading-[0.95] tracking-tighter mb-4 relative mix-blend-difference font-display">
+              {safari.title.split(' ').slice(0, -1).join(' ')} <br /> 
+              <span className="italic ml-16 text-amber">{safari.title.split(' ').pop()}.</span>
+            </h1>
+          </motion.div>
         </div>
       </section>
 
-      {/* Content */}
-      <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-14">
-            {/* Main */}
-            <div className="lg:col-span-2 space-y-14">
-              {/* Quick Info */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-wrap gap-8 p-7 bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-              >
-                <div className="flex items-center gap-3">
-                  <CalendarDays className="w-5 h-5 text-teal" />
-                  <div>
-                    <div className="text-[11px] text-warm-gray font-medium tracking-wide uppercase">
-                      Duration
-                    </div>
-                    <div className="font-semibold text-charcoal text-[15px]">
-                      {safari.duration}
-                    </div>
-                  </div>
+      {/* Narrative Section */}
+      <section className="py-16 bg-white relative">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+            
+            {/* Left: Metadata Portfolio */}
+            <div className="lg:col-span-4 space-y-8 sticky top-24">
+              <div className="bg-sand/30 p-6 border border-charcoal/5">
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-display italic text-amber text-lg">01</span>
+                  <div className="w-5 h-px bg-charcoal/10" />
+                  <span className="text-[7px] font-bold tracking-[0.3em] uppercase text-charcoal/30">Technical Specs</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-teal" />
-                  <div>
-                    <div className="text-[11px] text-warm-gray font-medium tracking-wide uppercase">
-                      Group Size
+                <div className="space-y-3">
+                  {[
+                    { label: "Duration", value: safari.duration },
+                    { label: "Guest Capacity", value: `Up to ${safari.maxGroupSize}` },
+                    { label: "Primary Zone", value: safari.location },
+                    { label: "Experience Level", value: "Ultra-Bespoke" },
+                  ].map((item) => (
+                    <div key={item.label} className="group border-b border-charcoal/5 pb-2.5 last:border-0">
+                      <span className="block text-[6px] font-bold text-charcoal/20 tracking-[0.3em] uppercase mb-0.5 group-hover:text-amber transition-colors">{item.label}</span>
+                      <span className="text-base font-display text-charcoal italic tracking-tight">{item.value}</span>
                     </div>
-                    <div className="font-semibold text-charcoal text-[15px]">
-                      Up to {safari.maxGroupSize}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-teal" />
-                  <div>
-                    <div className="text-[11px] text-warm-gray font-medium tracking-wide uppercase">
-                      Location
-                    </div>
-                    <div className="font-semibold text-charcoal text-[15px]">
-                      {safari.location}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Star className="w-5 h-5 text-amber fill-current" />
-                  <div>
-                    <div className="text-[11px] text-warm-gray font-medium tracking-wide uppercase">
-                      Rating
-                    </div>
-                    <div className="font-semibold text-charcoal text-[15px]">
-                      {safari.rating} ({safari.reviewCount})
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Description */}
-              <div>
-                <h2 className="font-display text-2xl text-charcoal mb-5 tracking-tight">
-                  About This Safari
-                </h2>
-                <p className="text-warm-gray leading-[1.85] text-[15px]">
-                  {safari.longDescription}
-                </p>
-              </div>
-
-              {/* Highlights */}
-              <div>
-                <h2 className="font-display text-2xl text-charcoal mb-5 tracking-tight">
-                  Safari Highlights
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {safari.highlights.map((highlight, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -15 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        delay: i * 0.05,
-                        duration: 0.7,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className="flex items-start gap-3.5 p-5 bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-teal/[0.06] flex items-center justify-center shrink-0 mt-0.5">
-                        <Check className="w-3.5 h-3.5 text-teal" />
-                      </div>
-                      <span className="text-[14px] text-charcoal leading-relaxed">
-                        {highlight}
-                      </span>
-                    </motion.div>
                   ))}
                 </div>
               </div>
 
-              {/* Itinerary */}
-              <div>
-                <h2 className="font-display text-2xl text-charcoal mb-7 tracking-tight">
-                  Day-by-Day Itinerary
-                </h2>
-                <div className="space-y-5">
-                  {safari.itinerary.map((day, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        delay: i * 0.08,
-                        duration: 0.8,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-                    >
-                      <div className="flex items-center gap-3.5 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-teal flex items-center justify-center">
-                          <span className="text-[13px] font-bold text-white">
-                            {day.day}
-                          </span>
-                        </div>
-                        <h3 className="font-display text-lg text-charcoal tracking-tight">
-                          {day.title}
-                        </h3>
-                      </div>
-                      <p className="text-warm-gray leading-[1.8] pl-[54px] text-[14px]">
-                        {day.description}
-                      </p>
-                    </motion.div>
-                  ))}
+              {/* Sidebar Booking Card */}
+              <div className="bg-charcoal p-6 text-white shadow-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-amber/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
+                <span className="block text-[6px] font-bold text-white/30 tracking-[0.4em] uppercase mb-3 relative z-10">Confidential Rate</span>
+                <div className="flex items-baseline gap-2 mb-6 relative z-10">
+                  <span className="text-3xl font-display italic text-amber tracking-tighter">${safari.price.toLocaleString()}</span>
+                  <span className="text-white/20 text-[8px] font-light uppercase tracking-[0.2em]">per guest</span>
                 </div>
-              </div>
-
-              {/* Gallery */}
-              <div>
-                <h2 className="font-display text-2xl text-charcoal mb-6 tracking-tight">
-                  Gallery
-                </h2>
-                <div className="grid grid-cols-3 gap-4">
-                  {safari.gallery.map((img, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        delay: i * 0.1,
-                        duration: 0.8,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className="aspect-square rounded-xl overflow-hidden group"
-                    >
-                      <img
-                        src={img}
-                        alt={`${safari.title} ${i + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      />
-                    </motion.div>
-                  ))}
+                <Link to="/booking" className="btn-raw w-full !bg-white !text-charcoal hover:!bg-amber text-center block relative z-10 hover-trigger !py-3">
+                  Inquire Privately
+                </Link>
+                <div className="mt-4 flex items-center justify-center gap-2 text-[6px] text-white/20 font-bold tracking-[0.3em] uppercase relative z-10">
+                  <ShieldCheck className="w-2.5 h-2.5 text-amber/50" />
+                  Certified Expedition
                 </div>
               </div>
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
-                {/* Price */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: 0.3,
-                    duration: 0.9,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="bg-white rounded-2xl p-7 shadow-lg"
-                >
-                  <div className="flex items-baseline gap-1.5 mb-2">
-                    <span className="font-display text-[40px] font-semibold text-charcoal tracking-tight">
-                      ${safari.price.toLocaleString()}
-                    </span>
-                    <span className="text-warm-gray text-[13px]">/ person</span>
+            {/* Right: The Body Narrative */}
+            <div className="lg:col-span-8 space-y-16">
+              <div className="max-w-2xl">
+                 <div className="flex items-center gap-3 mb-5">
+                    <span className="font-display italic text-amber text-xl">02</span>
+                    <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">The Narrative</span>
+                 </div>
+                 <h2 className="text-[clamp(1.4rem,3.5vw,2.2rem)] text-charcoal mb-8 leading-[1.1] italic tracking-tighter">Wilderness <br /> <span className="ml-12">Redefined.</span></h2>
+                 <div className="space-y-5 text-charcoal/70 text-lg leading-relaxed font-display italic">
+                  {safari.longDescription.split('\n').map((para, i) => (
+                    <p key={i} className="first-letter:text-5xl first-letter:font-bold first-letter:text-charcoal first-letter:mr-2 first-letter:float-left first-letter:leading-[0.8]">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Highlights Gallery */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 bg-sand/15 p-6 lg:p-8">
+                {safari.highlights.map((h, i) => (
+                  <div key={i} className="flex gap-4 py-5 border-b border-charcoal/5">
+                    <span className="font-display italic text-amber text-lg">0{i+1}</span>
+                    <p className="text-charcoal font-display text-xl leading-tight tracking-tight">{h}</p>
                   </div>
-                  <p className="text-[11px] text-warm-gray mb-7 tracking-wide">
-                    Minimum age: {safari.minAge} years
-                  </p>
-                  <Link
-                    to={`/booking?safari=${safari.id}`}
-                    className="group block w-full py-4 bg-teal text-white text-center rounded-2xl font-semibold text-sm tracking-wide hover:bg-deep-forest transition-all duration-500 mb-4 hover:shadow-lg hover:shadow-teal/20 hover:-translate-y-px"
-                  >
-                    Book This Safari
-                  </Link>
-                  <p className="text-[11px] text-center text-warm-gray tracking-wide">
-                    Free cancellation up to 48 hours before
-                  </p>
-                </motion.div>
+                ))}
+              </div>
 
-                {/* Included */}
-                <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                  <h3 className="font-display text-lg text-charcoal mb-5 tracking-tight">
-                    What's Included
-                  </h3>
-                  <ul className="space-y-3.5">
-                    {safari.included.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-[13px]">
-                        <Check className="w-4 h-4 text-teal shrink-0 mt-0.5" />
-                        <span className="text-warm-gray leading-relaxed">
-                          {item}
+              {/* Timeline Itinerary */}
+              <div>
+                 <div className="flex items-center gap-3 mb-5">
+                    <span className="font-display italic text-amber text-lg">03</span>
+                    <span className="text-[7px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Chronology</span>
+                 </div>
+                <h2 className="text-[clamp(1.4rem,3.5vw,2.2rem)] text-charcoal mb-6 leading-tight italic tracking-tight font-display">The <br /><span className="ml-6">Itinerary.</span></h2>
+                <div className="space-y-0 border-t border-charcoal/5">
+                  {safari.itinerary.map((day, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      className="group grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-charcoal/5 hover:bg-sand/10 transition-colors"
+                    >
+                      <div className="md:col-span-3">
+                        <span className="font-display text-lg italic text-charcoal/10 group-hover:text-amber transition-all duration-700">
+                          Day {day.day}
                         </span>
-                      </li>
-                    ))}
-                  </ul>
+                      </div>
+                      <div className="md:col-span-9">
+                        <h3 className="text-charcoal text-base font-display group-hover:italic group-hover:translate-x-1.5 transition-all duration-1000 tracking-tight">
+                          {day.title}
+                        </h3>
+                        <p className="text-charcoal/50 text-[13px] font-light leading-relaxed max-w-lg">
+                          {day.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
+              </div>
 
-                {/* Not Included */}
-                <div className="bg-white rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                  <h3 className="font-display text-lg text-charcoal mb-5 tracking-tight">
-                    Not Included
-                  </h3>
-                  <ul className="space-y-3.5">
-                    {safari.notIncluded.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-[13px]">
-                        <X className="w-4 h-4 text-coral shrink-0 mt-0.5" />
-                        <span className="text-warm-gray leading-relaxed">
-                          {item}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Gallery Montage */}
+              <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 aspect-[21/9] overflow-hidden bg-sand shadow-lg hover-trigger">
+                  <motion.img 
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 2.5 }}
+                    src={safari.gallery[0]} 
+                    alt={`${safari.title} primary view`}
+                    loading="lazy"
+                    className="w-full h-full object-cover grayscale-[40%] hover:grayscale-0 transition-all duration-[1500ms]" 
+                  />
                 </div>
+                <div className="col-span-12 lg:col-span-7 aspect-[4/5] overflow-hidden bg-sand shadow-md lg:-mt-12 z-10 hover-trigger">
+                  <motion.img 
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 2.5 }}
+                    src={safari.gallery[1]} 
+                    alt={`${safari.title} secondary view`}
+                    loading="lazy"
+                    className="w-full h-full object-cover grayscale-[40%] hover:grayscale-0 transition-all duration-[1500ms]" 
+                  />
+                </div>
+                <div className="col-span-12 lg:col-span-5 aspect-square overflow-hidden bg-sand shadow-sm mt-6 hover-trigger">
+                  <motion.img 
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 2.5 }}
+                    src={safari.gallery[2]} 
+                    alt={`${safari.title} detail view`}
+                    loading="lazy"
+                    className="w-full h-full object-cover grayscale-[40%] hover:grayscale-0 transition-all duration-[1500ms]" 
+                  />
+                </div>
+              </div>
+              
+              <div className="pt-12 text-center">
+                <Link to="/booking" className="btn-raw !px-12 !py-4 text-base hover-trigger">
+                   Begin Your Private Story
+                </Link>
               </div>
             </div>
           </div>

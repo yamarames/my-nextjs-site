@@ -1,28 +1,33 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Compass, ArrowLeft } from "lucide-react";
+import { MoveRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-sand flex items-center justify-center px-4">
+    <div className="min-h-screen bg-charcoal flex items-center justify-center px-6 overflow-hidden relative">
+      {/* Background Stencil */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
+        <h1 className="text-[25vw] font-display text-white whitespace-nowrap leading-none">LOST</h1>
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-md"
+        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+        className="text-center relative z-10"
       >
-        <div className="w-20 h-20 bg-teal/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Compass className="w-10 h-10 text-teal" />
-        </div>
-        <h1 className="font-display text-6xl text-charcoal mb-2">404</h1>
-        <h2 className="font-display text-2xl text-charcoal mb-4">Page Not Found</h2>
-        <p className="text-warm-gray mb-8">
-          Looks like you've wandered off the trail. Let's get you back on track.
+        <span className="text-amber font-bold text-[10px] tracking-[0.5em] uppercase mb-12 block">Error 404</span>
+        <h1 className="text-white text-huge leading-[0.75] tracking-tighter mb-12 italic">
+          Off the <br /> <span className="not-italic">Map.</span>
+        </h1>
+        <p className="text-white/40 text-xl font-light max-w-sm mx-auto leading-relaxed mb-16">
+          The coordinate you requested does not exist in our current collection.
         </p>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-teal text-white rounded-xl font-semibold hover:bg-deep-forest transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Home
+        <Link to="/" className="group flex items-center justify-center gap-6 text-white">
+          <span className="font-display text-3xl border-b border-white pb-2">Return Home</span>
+          <div className="w-12 h-12 rounded-full bg-white text-charcoal flex items-center justify-center group-hover:bg-amber transition-all duration-700">
+            <MoveRight className="w-6 h-6" />
+          </div>
         </Link>
       </motion.div>
     </div>
