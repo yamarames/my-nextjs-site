@@ -95,9 +95,9 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-bold text-white/80 uppercase tracking-widest mb-5">Contact Us</h4>
             <div className="space-y-4">
-              <a href="tel:+255777000000" className="flex items-start gap-3 text-white/50 hover:text-white transition-colors group">
+              <a href="tel:+255 651 568 860" className="flex items-start gap-3 text-white/50 hover:text-white transition-colors group">
                 <Phone className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                <span className="text-sm">+255 777 000 000</span>
+                <span className="text-sm">+255 651 568 860</span>
               </a>
               <a href="mailto:info@zantrica.com" className="flex items-start gap-3 text-white/50 hover:text-white transition-colors group">
                 <Mail className="w-4 h-4 text-amber shrink-0 mt-0.5" />
