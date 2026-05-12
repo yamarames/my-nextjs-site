@@ -149,7 +149,7 @@ export default function Navbar() {
                 </Link>
                 <div className="flex items-center justify-center gap-2 text-charcoal/50 text-sm">
                   <Phone className="w-4 h-4" />
-                  <span>+255 777 000 000</span>
+                  <span>+255 651 568 860</span>
                 </div>
               </motion.div>
 
