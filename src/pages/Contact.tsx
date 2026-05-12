@@ -96,8 +96,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <div className="font-semibold text-charcoal mb-1">Phone</div>
-                    <a href="tel:+255123456789" className="text-charcoal/60 text-sm hover:text-amber transition-colors">+255 123 456 789</a><br />
-                    <a href="tel:+255987654321" className="text-charcoal/60 text-sm hover:text-amber transition-colors">+255 987 654 321</a>
+                    <a href="tel:+255123456789" className="text-charcoal/60 text-sm hover:text-amber transition-colors">+255 651 568 860</a><br />
+                    <a href="tel:+255987654321" className="text-charcoal/60 text-sm hover:text-amber transition-colors">+255 651 568 860</a>
                   </div>
                 </div>
                 <div className="flex gap-4">
