@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Compass, ArrowRight } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 
 const navLinks = [
-  { name: "Collection", path: "/safaris", label: "01" },
-  { name: "Day Trips", path: "/tours", label: "02" },
-  { name: "About", path: "/about", label: "03" },
-  { name: "Contact", path: "/contact", label: "04" },
+  { name: "Safaris", path: "/safaris" },
+  { name: "Tours", path: "/tours" },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
 ];
 
 export default function Navbar() {
@@ -16,158 +16,154 @@ export default function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     setIsOpen(false);
+    document.body.style.overflow = "";
   }, [location]);
+
+  const toggleMenu = () => {
+    setIsOpen((v) => {
+      document.body.style.overflow = !v ? "hidden" : "";
+      return !v;
+    });
+  };
+
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-1000 ${
-          scrolled ? "bg-white/90 backdrop-blur-xl border-b border-charcoal/5 py-4" : "bg-transparent py-8"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100 py-3"
+            : "bg-transparent py-5"
         }`}
       >
-        <div className="max-w-[1800px] mx-auto px-6 sm:px-12 flex items-center justify-between">
-          <Link to="/" className="group flex items-center gap-4 relative z-[60] hover-trigger">
-            <div className="w-10 h-10 bg-charcoal text-white flex items-center justify-center font-bold text-lg rotate-45 group-hover:rotate-0 transition-transform duration-700">
-              <span className="-rotate-45 group-hover:rotate-0 transition-transform duration-700">Z</span>
+        <div className="section-container flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 z-[60]">
+            <div
+              className={`w-9 h-9 flex items-center justify-center font-bold text-lg font-display transition-colors duration-500 rounded-lg ${
+                scrolled || isOpen ? "bg-charcoal text-white" : "bg-white text-charcoal"
+              }`}
+            >
+              Z
             </div>
-            <span className={`font-display text-huge !text-3xl tracking-tighter ${!scrolled && !isOpen ? "text-white" : "text-charcoal"} transition-colors duration-700`}>
+            <span
+              className={`font-display text-2xl font-semibold tracking-tight transition-colors duration-500 ${
+                scrolled || isOpen ? "text-charcoal" : "text-white"
+              }`}
+            >
               Zan<span className="italic font-light">Trica</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-16">
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`relative group text-[10px] font-bold tracking-[0.4em] uppercase hover-trigger ${
-                  !scrolled ? "text-white/60 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
-                } transition-colors duration-500`}
+                className={`text-sm font-semibold transition-colors duration-300 relative group ${
+                  isActive(link.path)
+                    ? scrolled ? "text-amber" : "text-white"
+                    : scrolled ? "text-charcoal/60 hover:text-charcoal" : "text-white/70 hover:text-white"
+                }`}
               >
-                <span className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 text-[8px] text-amber italic font-display">
-                  {link.label}
-                </span>
                 {link.name}
+                <span
+                  className={`absolute -bottom-1 left-0 h-0.5 bg-amber transition-all duration-300 ${
+                    isActive(link.path) ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
               </Link>
             ))}
-            <Link to="/booking" className="btn-raw !py-4 !px-10 text-[10px] hover-trigger">
-              Inquire
+            <Link
+              to="/booking"
+              className="ml-2 px-5 py-2.5 bg-amber text-white text-sm font-semibold rounded-xl hover:bg-amber/90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+            >
+              Book Now
             </Link>
           </div>
 
-          {/* Menu Trigger */}
+          {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="relative z-[60] flex items-center gap-6 group hover-trigger"
+            onClick={toggleMenu}
+            className={`lg:hidden z-[60] p-2 rounded-lg transition-colors ${
+              isOpen || scrolled ? "text-charcoal" : "text-white"
+            }`}
+            aria-label="Toggle menu"
           >
-            <span className={`text-[10px] font-bold tracking-[0.4em] uppercase hidden sm:block ${
-              !scrolled && !isOpen ? "text-white/40" : "text-charcoal/40"
-            }`}>
-              {isOpen ? "Close" : "Menu"}
-            </span>
-            <div className="relative w-10 h-6 flex flex-col justify-center gap-1.5 overflow-hidden">
-              <span className={`w-full h-px transition-all duration-700 ${
-                isOpen ? "rotate-45 translate-y-[4px]" : ""
-              } ${!scrolled && !isOpen ? "bg-white" : "bg-charcoal"}`} />
-              <span className={`w-full h-px transition-all duration-700 ${
-                isOpen ? "-rotate-45 -translate-y-[3px]" : ""
-              } ${!scrolled && !isOpen ? "bg-white" : "bg-charcoal"}`} />
-            </div>
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </nav>
 
-      {/* Fullscreen Overlay Menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-100%" }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[55] bg-white flex flex-col lg:flex-row overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed inset-0 z-[55] bg-white flex flex-col"
           >
-            {/* Massive Background text */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
-              <span className="text-[15vw] font-display font-bold leading-none italic">MENU</span>
-            </div>
-
-            {/* Left: Menu Links */}
-            <div className="flex-1 flex flex-col justify-center px-6 sm:px-24 py-32 border-r border-charcoal/5 relative z-10">
+            <div className="flex-1 flex flex-col justify-center px-6 py-24">
               <div className="space-y-2">
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.name}
-                    initial={{ opacity: 0, x: -50 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + i * 0.1, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 0.05 + i * 0.07 }}
                   >
                     <Link
                       to={link.path}
-                      className="group flex items-baseline gap-12 hover-trigger"
+                      className={`block py-4 text-4xl font-display font-semibold border-b border-gray-100 transition-colors ${
+                        isActive(link.path) ? "text-amber" : "text-charcoal hover:text-amber"
+                      }`}
                     >
-                      <span className="font-display text-2xl italic text-amber">{link.label}</span>
-                      <span className="font-display text-5xl sm:text-7xl text-charcoal tracking-tighter transition-all duration-1000 group-hover:italic group-hover:translate-x-4">
-                        {link.name}
-                      </span>
+                      {link.name}
                     </Link>
                   </motion.div>
                 ))}
               </div>
-            </div>
 
-            {/* Right: Featured / Contact Info */}
-            <div className="w-full lg:w-1/3 bg-sand/30 p-24 hidden lg:flex flex-col justify-between relative z-10">
-              <div className="space-y-32">
-                <div>
-                  <span className="block text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/20 mb-12">Boutique Offices</span>
-                  <div className="space-y-16">
-                    <div>
-                      <h4 className="font-display text-4xl mb-6 italic">Zanzibar</h4>
-                      <p className="text-base text-charcoal/50 leading-relaxed font-light">
-                        Hurumzi St, Stone Town<br />
-                        The Spice Island
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-display text-4xl mb-6 italic">Arusha</h4>
-                      <p className="text-base text-charcoal/50 leading-relaxed font-light">
-                        Njiro Road, Kijenge<br />
-                        The Safari Capital
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-8">
-                   <span className="block text-[10px] font-bold tracking-[0.5em] uppercase text-charcoal/20 mb-12">Social Connect</span>
-                   <div className="flex gap-12">
-                     {[
-                       { name: "Instagram", url: "https://instagram.com/zantrica" },
-                       { name: "Facebook", url: "https://facebook.com/zantrica" },
-                       { name: "Twitter", url: "https://twitter.com/zantrica" }
-                     ].map(s => (
-                       <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" className="text-charcoal hover:text-amber transition-colors font-display text-2xl italic hover-trigger">{s.name}</a>
-                     ))}
-                   </div>
-                </div>
-              </div>
-
-              <div className="pt-20 border-t border-charcoal/10">
-                <Link to="/booking" className="group flex items-center justify-between text-charcoal hover-trigger">
-                  <span className="font-display text-3xl italic">Start Your Story</span>
-                  <div className="w-12 h-12 rounded-full border border-charcoal/10 flex items-center justify-center group-hover:bg-charcoal group-hover:text-white transition-all duration-700">
-                    <ArrowRight className="w-5 h-5" />
-                  </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-10 space-y-4"
+              >
+                <Link
+                  to="/booking"
+                  className="block w-full text-center py-4 bg-amber text-white font-semibold text-lg rounded-xl"
+                >
+                  Book Now
                 </Link>
+                <div className="flex items-center justify-center gap-2 text-charcoal/50 text-sm">
+                  <Phone className="w-4 h-4" />
+                  <span>+255 777 000 000</span>
+                </div>
+              </motion.div>
+
+              <div className="mt-12 pt-8 border-t border-gray-100">
+                <div className="grid grid-cols-2 gap-6 text-sm text-charcoal/60">
+                  <div>
+                    <p className="font-semibold text-charcoal mb-1">Zanzibar Office</p>
+                    <p>Hurumzi St, Stone Town</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-charcoal mb-1">Arusha Office</p>
+                    <p>Njiro Road, Kijenge</p>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

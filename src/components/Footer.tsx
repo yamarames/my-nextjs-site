@@ -1,110 +1,115 @@
 import { Link } from "react-router-dom";
-import {
-  Compass,
-  MapPin,
-  Phone,
-  Mail,
-  Instagram,
-  Facebook,
-  Twitter,
-  ArrowUp,
-  ArrowUpRight,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { Phone, Mail, MapPin, Instagram, Facebook, Twitter, ArrowUpRight } from "lucide-react";
+
+const LINKS = {
+  explore: [
+    { label: "Zanzibar Tours", path: "/tours" },
+    { label: "Tanzania Safaris", path: "/safaris" },
+    { label: "Book a Trip", path: "/booking" },
+    { label: "Custom Tours", path: "/contact" },
+  ],
+  company: [
+    { label: "About Us", path: "/about" },
+    { label: "Contact", path: "/contact" },
+    { label: "Reviews", path: "/about#reviews" },
+    { label: "FAQ", path: "/contact#faq" },
+  ],
+};
 
 export default function Footer() {
-  const scrollToTop = () =>
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="bg-charcoal text-white/70 relative overflow-hidden pt-32 pb-16">
-      {/* Subtle top gradient */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-white/5" />
-      
-      {/* Massive Background Logo - Subtle */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.015] pointer-events-none select-none">
-        <span className="text-[12vw] font-display font-bold leading-none italic">ZT</span>
-      </div>
-
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
-          {/* Brand & Manifesto */}
-          <div className="lg:col-span-5 space-y-10">
-            <Link to="/" className="group flex items-center gap-4 hover-trigger">
-              <div className="w-10 h-10 bg-white text-charcoal flex items-center justify-center font-bold text-lg rotate-45 group-hover:rotate-0 transition-transform duration-700">
-                <span className="-rotate-45 group-hover:rotate-0 transition-transform duration-700">Z</span>
+    <footer className="bg-charcoal text-white">
+      <div className="section-container pt-16 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-14">
+          {/* Brand */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 bg-white text-charcoal flex items-center justify-center font-bold text-lg font-display rounded-lg">
+                Z
               </div>
-              <span className="font-display text-3xl text-white tracking-tighter">
+              <span className="font-display text-2xl font-semibold tracking-tight text-white">
                 Zan<span className="italic font-light">Trica</span>
               </span>
             </Link>
-            
-            <h4 className="text-2xl text-white/40 font-display italic leading-snug max-w-sm">
-              "We strip away the noise of mass tourism to reveal the soul of Tanzania."
-            </h4>
-
-            <div className="flex gap-8">
+            <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-xs">
+              Local experts in Zanzibar and Tanzania. We've been guiding travellers
+              through the magic of East Africa since 2012.
+            </p>
+            <div className="flex gap-4">
               {[
                 { icon: Instagram, label: "Instagram", url: "https://instagram.com/zantrica" },
                 { icon: Facebook, label: "Facebook", url: "https://facebook.com/zantrica" },
-                { icon: Twitter, label: "Twitter", url: "https://twitter.com/zantrica" },
-              ].map((social) => (
+                { icon: Twitter, label: "Twitter / X", url: "https://twitter.com/zantrica" },
+              ].map((s) => (
                 <a
-                  key={social.label}
-                  href={social.url}
+                  key={s.label}
+                  href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="text-white/30 hover:text-amber transition-colors duration-500 hover-trigger"
+                  aria-label={s.label}
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/60 hover:bg-amber hover:text-white transition-all duration-300"
                 >
-                  <social.icon className="w-5 h-5" />
+                  <s.icon className="w-4 h-4" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Navigation Columns */}
-          <div className="lg:col-span-7">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 lg:gap-20">
-              <div>
-                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Expeditions</span>
-                <ul className="space-y-4">
-                  {["The Collection", "Private Safaris", "Day Excursions", "The Migration"].map((item) => (
-                    <li key={item}>
-                      <Link to="/safaris" className="text-white/40 hover:text-white transition-colors font-display text-xl italic hover-trigger">
-                        {item}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* Explore */}
+          <div>
+            <h4 className="text-sm font-bold text-white/80 uppercase tracking-widest mb-5">Explore</h4>
+            <ul className="space-y-3">
+              {LINKS.explore.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    to={l.path}
+                    className="text-white/50 hover:text-white text-sm transition-colors duration-200"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              <div>
-                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Inquiry</span>
-                <ul className="space-y-4">
-                  {["About Us", "Contact", "Booking Info", "Privacy Policy"].map((item) => (
-                    <li key={item}>
-                      <Link to="/about" className="text-white/40 hover:text-white transition-colors font-display text-xl italic hover-trigger">
-                        {item}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* Company */}
+          <div>
+            <h4 className="text-sm font-bold text-white/80 uppercase tracking-widest mb-5">Company</h4>
+            <ul className="space-y-3">
+              {LINKS.company.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    to={l.path}
+                    className="text-white/50 hover:text-white text-sm transition-colors duration-200"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              <div>
-                <span className="block text-[9px] font-bold tracking-[0.4em] uppercase text-white/20 mb-8">Offices</span>
-                <div className="space-y-6 text-white/40 text-[11px] font-light leading-relaxed uppercase tracking-widest">
-                  <p>
-                    <span className="block text-amber mb-2 italic font-display normal-case tracking-normal text-sm">Zanzibar</span>
-                    Hurumzi St, Stone Town<br />
-                    The Spice Island
-                  </p>
-                  <p>
-                    <span className="block text-amber mb-2 italic font-display normal-case tracking-normal text-sm">Arusha</span>
-                    Njiro Road, Kijenge<br />
-                    The Safari Capital
-                  </p>
+          {/* Contact */}
+          <div>
+            <h4 className="text-sm font-bold text-white/80 uppercase tracking-widest mb-5">Contact Us</h4>
+            <div className="space-y-4">
+              <a href="tel:+255777000000" className="flex items-start gap-3 text-white/50 hover:text-white transition-colors group">
+                <Phone className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                <span className="text-sm">+255 777 000 000</span>
+              </a>
+              <a href="mailto:info@zantrica.com" className="flex items-start gap-3 text-white/50 hover:text-white transition-colors group">
+                <Mail className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                <span className="text-sm">info@zantrica.com</span>
+              </a>
+              <div className="flex items-start gap-3 text-white/50">
+                <MapPin className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-white/70 font-medium">Zanzibar</p>
+                  <p>Hurumzi St, Stone Town</p>
+                  <p className="text-white/70 font-medium mt-2">Arusha</p>
+                  <p>Njiro Road, Kijenge</p>
                 </div>
               </div>
             </div>
@@ -112,27 +117,25 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-32 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-12">
-             <p className="text-[9px] font-bold tracking-[0.4em] text-white/10 uppercase">
-              © {new Date().getFullYear()} Zantrica Explorations
-            </p>
-            <div className="hidden sm:flex gap-10 text-[9px] font-bold tracking-widest text-white/20 uppercase">
-              <span className="hover:text-white cursor-pointer transition-colors hover-trigger">English</span>
-              <span className="hover:text-white cursor-pointer transition-colors hover-trigger">Swahili</span>
-            </div>
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-white/30 text-xs">
+            © {new Date().getFullYear()} Zantrica Tours &amp; Safaris. All rights reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            <span className="text-white/30 text-xs hover:text-white cursor-pointer transition-colors">
+              Privacy Policy
+            </span>
+            <span className="text-white/30 text-xs hover:text-white cursor-pointer transition-colors">
+              Terms of Service
+            </span>
+            <button
+              onClick={scrollToTop}
+              className="flex items-center gap-2 text-white/30 hover:text-white text-xs transition-colors"
+            >
+              Back to top
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          
-          <motion.button
-            onClick={scrollToTop}
-            whileHover={{ y: -5 }}
-            className="group flex items-center gap-4 text-white/40 hover:text-white transition-colors hover-trigger"
-          >
-            <span className="text-[9px] font-bold tracking-[0.4em] uppercase">Back to Top</span>
-            <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-charcoal transition-all duration-700">
-              <ArrowUp className="w-4 h-4" />
-            </div>
-          </motion.button>
         </div>
       </div>
     </footer>

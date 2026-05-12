@@ -1,17 +1,18 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Calendar as CalendarIcon,
+  Calendar,
   Users,
   Minus,
   Plus,
   Check,
   ArrowRight,
   ShieldCheck,
-  MoveRight,
   ChevronLeft,
   ChevronRight,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import {
   format,
@@ -36,65 +37,36 @@ interface BookingItem {
   duration: string;
 }
 
+const STEPS = [
+  { n: 1, label: "Trip Details" },
+  { n: 2, label: "Your Details" },
+  { n: 3, label: "Confirmed" },
+];
+
 export default function Booking() {
   const [searchParams] = useSearchParams();
   const tourId = searchParams.get("tour");
   const safariId = searchParams.get("safari");
 
   const [selectedDate, setSelectedDate] = useState<Date>(addDays(new Date(), 3));
+  const [currentMonthDate, setCurrentMonthDate] = useState<Date>(new Date());
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [selectedItems, setSelectedItems] = useState<BookingItem[]>([]);
   const [step, setStep] = useState(1);
 
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   useEffect(() => {
     const items: BookingItem[] = [];
     if (tourId) {
       const tour = getTourById(tourId);
-      if (tour) {
-        items.push({
-          id: tour.id,
-          title: tour.title,
-          type: "tour",
-          price: tour.price,
-          image: tour.image,
-          duration: tour.duration,
-        });
-      }
+      if (tour) items.push({ id: tour.id, title: tour.title, type: "tour", price: tour.price, image: tour.image, duration: tour.duration });
     }
     if (safariId) {
       const safari = getSafariById(safariId);
-      if (safari) {
-        items.push({
-          id: safari.id,
-          title: safari.title,
-          type: "safari",
-          price: safari.price,
-          image: safari.image,
-          duration: safari.duration,
-        });
-      }
+      if (safari) items.push({ id: safari.id, title: safari.title, type: "safari", price: safari.price, image: safari.image, duration: safari.duration });
     }
     if (items.length === 0) {
-      items.push(
-        ...tours.slice(0, 1).map((t) => ({
-          id: t.id,
-          title: t.title,
-          type: "tour" as const,
-          price: t.price,
-          image: t.image,
-          duration: t.duration,
-        }))
-      );
+      items.push(...tours.slice(0, 1).map((t) => ({ id: t.id, title: t.title, type: "tour" as const, price: t.price, image: t.image, duration: t.duration })));
     }
     setSelectedItems(items);
   }, [tourId, safariId]);
@@ -107,14 +79,13 @@ export default function Booking() {
   const serviceFee = subtotal * 0.05;
   const total = subtotal + serviceFee;
 
-  const currentMonth = startOfMonth(selectedDate);
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentMonth),
-    end: endOfMonth(currentMonth),
-  });
-
-  const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const currentMonth = startOfMonth(currentMonthDate);
+  const days = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const today = startOfDay(new Date());
+
+  const handlePrevMonth = () => setCurrentMonthDate(addDays(currentMonth, -1));
+  const handleNextMonth = () => setCurrentMonthDate(addDays(endOfMonth(currentMonth), 1));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,326 +93,395 @@ export default function Booking() {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-white overflow-hidden">
-      {/* Editorial Hero */}
-      <section className="relative h-[45vh] bg-charcoal flex items-center px-6 sm:px-12 lg:px-24 overflow-hidden pt-12">
-        <motion.div style={{ y, opacity }} className="absolute inset-0 opacity-[0.03] select-none pointer-events-none flex items-center justify-center">
-           <h1 className="text-[6vw] font-display font-bold text-white whitespace-nowrap italic">RESERVE</h1>
-        </motion.div>
+    <div className="min-h-screen bg-sand/30">
+      {/* ── HEADER ── */}
+      <section className="bg-charcoal pt-20 pb-12">
+        <div className="section-container">
+          <h1 className="text-4xl sm:text-5xl font-display font-semibold text-white mb-3">
+            Book Your Trip
+          </h1>
+          <p className="text-white/60 text-base max-w-md">
+            Complete the form below and our team will confirm your booking within 24 hours.
+          </p>
 
-        <div className="relative z-10 w-full max-w-[1200px] mx-auto">
-          <div className="max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-8 h-px bg-amber" />
-                <span className="text-amber font-bold text-[8px] tracking-[0.4em] uppercase">The Reservation Protocol</span>
+          {/* Step indicator */}
+          <div className="flex items-center gap-3 mt-8">
+            {STEPS.map((s, i) => (
+              <div key={s.n} className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500",
+                      step > s.n
+                        ? "bg-amber text-white"
+                        : step === s.n
+                        ? "bg-white text-charcoal ring-2 ring-amber"
+                        : "bg-white/10 text-white/30"
+                    )}
+                  >
+                    {step > s.n ? <Check className="w-4 h-4" /> : s.n}
+                  </div>
+                  <span
+                    className={cn(
+                      "text-sm font-semibold transition-colors",
+                      step >= s.n ? "text-white" : "text-white/30"
+                    )}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={cn("w-12 h-0.5 transition-colors", step > s.n ? "bg-amber" : "bg-white/10")} />
+                )}
               </div>
-              <h1 className="text-white text-huge mb-6 relative">
-                Secure Your <br /> <span className="italic ml-12 text-amber">Timeline.</span>
-              </h1>
-              
-              {/* Step Indicators */}
-              <div className="flex gap-8 items-center mt-6">
-                 {[
-                   { n: 1, label: "Configuration" },
-                   { n: 2, label: "Identity" },
-                   { n: 3, label: "Finalization" }
-                 ].map((stepObj) => (
-                   <div key={stepObj.n} className="flex items-center gap-3 group">
-                      <span className={cn(
-                        "font-display text-2xl italic transition-all duration-700",
-                        step >= stepObj.n ? "text-amber" : "text-white/10"
-                      )}>
-                        0{stepObj.n}
-                      </span>
-                      <span className={cn(
-                        "text-[7px] font-bold tracking-[0.3em] uppercase transition-all duration-700",
-                        step >= stepObj.n ? "text-white/60" : "text-white/5"
-                      )}>
-                        {stepObj.label}
-                      </span>
-                      {stepObj.n < 3 && <div className="w-6 h-px bg-white/10" />}
-                   </div>
-                 ))}
-              </div>
-            </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Main Form Area */}
-      <section className="py-16 bg-sand/20 relative">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-24">
+      {/* ── FORM AREA ── */}
+      <section className="py-10">
+        <div className="section-container">
           <AnimatePresence mode="wait">
+            {/* ── STEP 1: TRIP DETAILS ── */}
             {step === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16"
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8"
               >
-                <div className="lg:col-span-8 space-y-12">
-                  {/* Calendar Portfolio - Mobile App Style */}
-                  <div>
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="font-display italic text-amber text-xl">01</span>
-                      <div className="w-6 h-px bg-charcoal/10" />
-                      <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Temporal Selection</span>
+                {/* Left: Calendar + Guests */}
+                <div className="lg:col-span-8 space-y-8">
+                  {/* Date Picker */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber/10 flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-amber" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-charcoal text-lg">Choose Your Date</h3>
+                          <p className="text-xs text-charcoal/50">Select your preferred start date</p>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="bg-white p-6 sm:p-10 shadow-[0_30px_60px_rgba(0,0,0,0.08)] relative overflow-hidden rounded-3xl">
-                       <div className="flex items-center justify-between mb-10">
-                         <div>
-                            <h3 className="text-2xl font-bold text-charcoal font-display italic tracking-tight">
-                              {format(currentMonth, "MMMM yyyy")}
-                            </h3>
-                            <span className="text-[10px] font-bold text-charcoal/20 uppercase tracking-[0.3em]">Select your arrival date</span>
-                         </div>
-                         <div className="flex gap-2">
-                           <button 
-                             onClick={() => setSelectedDate(addDays(currentMonth, -30))} 
-                             className="w-10 h-10 rounded-2xl bg-sand/50 flex items-center justify-center hover:bg-amber hover:text-white transition-all duration-500 hover-trigger"
-                           >
-                             <ChevronLeft className="w-5 h-5" />
-                           </button>
-                           <button 
-                             onClick={() => setSelectedDate(addDays(currentMonth, 30))} 
-                             className="w-10 h-10 rounded-2xl bg-sand/50 flex items-center justify-center hover:bg-amber hover:text-white transition-all duration-500 hover-trigger"
-                           >
-                             <ChevronRight className="w-5 h-5" />
-                           </button>
-                         </div>
-                       </div>
+                    <div className="p-6">
+                      {/* Month navigation */}
+                      <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-xl font-display font-semibold text-charcoal">
+                          {format(currentMonth, "MMMM yyyy")}
+                        </h4>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handlePrevMonth}
+                            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-amber hover:text-white transition-all"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={handleNextMonth}
+                            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-amber hover:text-white transition-all"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
 
-                       <div className="grid grid-cols-7 gap-1">
-                          {weekDays.map(d => (
-                            <div key={d} className="text-center text-[8px] font-bold text-charcoal/20 uppercase tracking-[0.2em] py-4">{d}</div>
-                          ))}
-                          
-                          {Array.from({ length: days[0].getDay() }).map((_, i) => (
-                            <div key={`empty-${i}`} className="aspect-square" />
-                          ))}
-                          
-                          {days.map((day) => {
-                            const isSelected = isSameDay(day, selectedDate);
-                            const isPast = isBefore(day, today);
-                            const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+                      <div className="grid grid-cols-7 gap-1">
+                        {weekDays.map((d) => (
+                          <div key={d} className="text-center text-xs font-semibold text-charcoal/30 py-2">
+                            {d}
+                          </div>
+                        ))}
+                        {Array.from({ length: days[0].getDay() }).map((_, i) => (
+                          <div key={`e-${i}`} className="aspect-square" />
+                        ))}
+                        {days.map((day) => {
+                          const isSelected = isSameDay(day, selectedDate);
+                          const isPast = isBefore(day, today);
+                          const isToday = isSameDay(day, new Date());
 
-                            return (
-                              <button
-                                key={day.toISOString()}
-                                onClick={() => !isPast && setSelectedDate(day)}
-                                disabled={isPast}
-                                className={cn(
-                                  "aspect-square flex flex-col items-center justify-center rounded-2xl text-sm transition-all duration-500 relative group hover-trigger",
-                                  isSelected 
-                                    ? "bg-amber text-white font-bold shadow-[0_10px_25px_rgba(217,119,6,0.4)] scale-95" 
-                                    : "hover:bg-sand/50 text-charcoal/80",
-                                  isPast ? "opacity-[0.05] cursor-not-allowed" : "",
-                                  !isCurrentMonth ? "opacity-20" : ""
-                                )}
-                              >
-                                <span className={cn(
-                                  "relative z-10",
-                                  isSelected ? "font-display italic text-lg" : ""
-                                )}>
-                                  {format(day, "d")}
-                                </span>
-                                {isSameDay(day, new Date()) && !isSelected && (
-                                  <div className="w-1 h-1 bg-amber rounded-full mt-0.5" />
-                                )}
-                              </button>
-                            );
-                          })}
-                       </div>
+                          return (
+                            <button
+                              key={day.toISOString()}
+                              onClick={() => !isPast && setSelectedDate(day)}
+                              disabled={isPast}
+                              className={cn(
+                                "aspect-square flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-200",
+                                isSelected
+                                  ? "bg-amber text-white font-bold shadow-md"
+                                  : isToday
+                                  ? "bg-amber/10 text-amber font-bold border border-amber/30"
+                                  : isPast
+                                  ? "text-charcoal/15 cursor-not-allowed"
+                                  : "text-charcoal hover:bg-sand"
+                              )}
+                            >
+                              {format(day, "d")}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-3 p-3 bg-amber/5 rounded-xl border border-amber/10">
+                        <Calendar className="w-4 h-4 text-amber shrink-0" />
+                        <p className="text-sm text-charcoal/70">
+                          Selected:{" "}
+                          <strong className="text-charcoal">
+                            {format(selectedDate, "EEEE, MMMM do, yyyy")}
+                          </strong>
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Group Density */}
-                  <div>
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="font-display italic text-amber text-xl">02</span>
-                      <div className="w-6 h-px bg-charcoal/10" />
-                      <span className="text-[8px] font-bold tracking-[0.4em] uppercase text-charcoal/30">Guest Density</span>
+                  {/* Guests */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber/10 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-amber" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-charcoal text-lg">Number of Guests</h3>
+                          <p className="text-xs text-charcoal/50">Children get 50% discount</p>
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="p-6 space-y-4">
                       {[
-                        { label: "Adults", sub: "Ages 13+", val: adults, set: setAdults, min: 1 },
-                        { label: "Children", sub: "Ages 3-12", val: children, set: setChildren, min: 0 },
+                        { label: "Adults", sub: "Ages 13 and over", val: adults, set: setAdults, min: 1 },
+                        { label: "Children", sub: "Ages 3–12 (50% discount)", val: children, set: setChildren, min: 0 },
                       ].map((item) => (
-                        <div key={item.label} className="bg-white p-6 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] flex justify-between items-center group transition-all">
-                           <div>
-                             <h4 className="font-display text-2xl mb-1 group-hover:italic transition-all duration-700">{item.label}</h4>
-                             <span className="text-[8px] font-bold text-charcoal/20 uppercase tracking-[0.3em]">{item.sub}</span>
-                           </div>
-                           <div className="flex items-center gap-5">
-                             <button 
-                               onClick={() => item.set(Math.max(item.min, item.val - 1))} 
-                               className="w-8 h-8 rounded-xl bg-sand flex items-center justify-center text-charcoal/40 hover:text-amber hover:bg-sand/80 transition-all hover-trigger"
-                             >
-                               <Minus className="w-4 h-4" />
-                             </button>
-                             <span className="font-display text-3xl italic w-10 text-center tracking-tighter text-charcoal/80">{item.val}</span>
-                             <button 
-                               onClick={() => item.set(item.val + 1)} 
-                               className="w-8 h-8 rounded-xl bg-sand flex items-center justify-center text-charcoal/40 hover:text-amber hover:bg-sand/80 transition-all hover-trigger"
-                             >
-                               <Plus className="w-4 h-4" />
-                             </button>
-                           </div>
+                        <div key={item.label} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+                          <div>
+                            <p className="font-semibold text-charcoal text-base">{item.label}</p>
+                            <p className="text-xs text-charcoal/50 mt-0.5">{item.sub}</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <button
+                              onClick={() => item.set(Math.max(item.min, item.val - 1))}
+                              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-charcoal hover:bg-amber hover:text-white transition-all"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="text-2xl font-bold text-charcoal w-8 text-center font-display">
+                              {item.val}
+                            </span>
+                            <button
+                              onClick={() => item.set(item.val + 1)}
+                              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-charcoal hover:bg-amber hover:text-white transition-all"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Summary Sidebar */}
+                {/* Right: Booking Summary */}
                 <div className="lg:col-span-4">
-                  <div className="sticky top-24 bg-white border border-charcoal/5 p-8 space-y-10 shadow-[0_40px_80px_rgba(0,0,0,0.06)] rounded-3xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber/[0.03] blur-3xl rounded-full" />
-                    
-                    <div>
-                      <span className="text-[7px] font-bold tracking-[0.4em] uppercase text-charcoal/30 block mb-6">Your Selection</span>
-                      {selectedItems.map(item => (
-                        <div key={item.id} className="flex gap-4 group mb-5">
-                           <div className="w-14 h-14 bg-sand overflow-hidden shrink-0 shadow-sm rounded-2xl">
-                             <img src={item.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
-                           </div>
-                           <div>
-                             <h4 className="font-display text-base mb-0.5 italic leading-tight">{item.title}</h4>
-                             <div className="w-4 h-px bg-amber mb-1 opacity-40" />
-                             <span className="text-[7px] font-bold text-charcoal/40 uppercase tracking-[0.3em]">{item.duration}</span>
-                           </div>
+                  <div className="sticky top-24 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100">
+                      <h3 className="font-semibold text-charcoal text-lg">Booking Summary</h3>
+                    </div>
+                    <div className="p-6 space-y-5">
+                      {/* Selected tours */}
+                      {selectedItems.map((item) => (
+                        <div key={item.id} className="flex gap-3">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-charcoal text-sm leading-tight">{item.title}</p>
+                            <p className="text-xs text-charcoal/50 mt-1 flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {item.duration}
+                            </p>
+                            <span className={cn(
+                              "text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block",
+                              item.type === "tour" ? "bg-blue-50 text-blue-600" : "bg-green-50 text-green-600"
+                            )}>
+                              {item.type === "tour" ? "Day Tour" : "Safari"}
+                            </span>
+                          </div>
                         </div>
                       ))}
-                    </div>
 
-                    <div className="border-t border-charcoal/5 pt-8 space-y-4">
-                       <div className="flex justify-between items-center">
-                         <span className="text-charcoal/30 uppercase tracking-[0.25em] text-[8px] font-bold">Departure</span>
-                         <span className="font-display text-base italic text-charcoal/80">{format(selectedDate, "MMM do, yyyy")}</span>
-                       </div>
-                       <div className="flex justify-between items-end pt-4 border-t border-charcoal/5">
-                         <span className="text-charcoal/30 uppercase tracking-[0.25em] text-[8px] font-bold">Total Investment</span>
-                         <div className="text-right">
-                           <span className="font-display text-3xl italic text-amber tracking-tighter">${total.toLocaleString()}</span>
-                           <span className="block text-[6px] font-bold text-charcoal/20 uppercase tracking-widest">Incl. all services</span>
-                         </div>
-                       </div>
-                    </div>
+                      <div className="pt-4 border-t border-gray-100 space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-charcoal/60">Departure Date</span>
+                          <span className="font-semibold text-charcoal">{format(selectedDate, "MMM d, yyyy")}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-charcoal/60">Adults × {adults}</span>
+                          <span className="font-semibold text-charcoal">${(selectedItems.reduce((s, i) => s + i.price, 0) * adults).toLocaleString()}</span>
+                        </div>
+                        {children > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-charcoal/60">Children × {children} (50% off)</span>
+                            <span className="font-semibold text-charcoal">${(selectedItems.reduce((s, i) => s + i.price, 0) * children * 0.5).toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-charcoal/60">Service fee (5%)</span>
+                          <span className="font-semibold text-charcoal">${serviceFee.toFixed(0)}</span>
+                        </div>
+                        <div className="flex justify-between pt-3 border-t border-gray-100">
+                          <span className="font-bold text-charcoal">Total</span>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-amber font-display">${total.toLocaleString()}</span>
+                            <p className="text-xs text-charcoal/40">All taxes included</p>
+                          </div>
+                        </div>
+                      </div>
 
-                    <button onClick={() => setStep(2)} className="btn-raw w-full !px-0 hover-trigger !py-4 !bg-charcoal !text-white hover:!bg-amber rounded-2xl shadow-lg">
-                      Proceed to Identity
-                    </button>
-                    
-                    <div className="flex items-center justify-center gap-2 text-[7px] font-bold text-charcoal/20 uppercase tracking-[0.3em] pt-2">
-                       <ShieldCheck className="w-3 h-3 text-amber/40" />
-                       Encrypted Transaction
+                      <button
+                        onClick={() => setStep(2)}
+                        className="w-full btn-primary justify-center py-4 text-base"
+                      >
+                        Continue to Your Details
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+
+                      <div className="flex items-center justify-center gap-2 text-xs text-charcoal/40 pt-1">
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber/60" />
+                        Secure booking · Free cancellation available
+                      </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
             )}
 
+            {/* ── STEP 2: YOUR DETAILS ── */}
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="max-w-4xl mx-auto bg-white p-8 sm:p-16 relative overflow-hidden shadow-2xl rounded-[3rem]"
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-3xl mx-auto"
               >
-                <div className="absolute top-0 right-0 p-8 opacity-[0.015] pointer-events-none select-none">
-                  <h3 className="text-[8vw] font-display text-charcoal leading-none italic uppercase font-bold">Identity</h3>
-                </div>
-
-                <form onSubmit={handleSubmit} className="relative z-10 space-y-12">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                      <div className="space-y-3">
-                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">First Identity</label>
-                        <input
-                          type="text" required
-                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
-                          placeholder="Julianne"
-                        />
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="p-8 border-b border-gray-100">
+                    <h2 className="text-2xl font-display font-semibold text-charcoal">Your Details</h2>
+                    <p className="text-charcoal/60 text-sm mt-1">Fill in your contact information to complete the booking request.</p>
+                  </div>
+                  <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                    {/* Name */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="form-label">First Name</label>
+                        <input type="text" required className="form-input" placeholder="John" />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Last Identity</label>
-                        <input
-                          type="text" required
-                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
-                          placeholder="Moore"
-                        />
+                      <div>
+                        <label className="form-label">Last Name</label>
+                        <input type="text" required className="form-input" placeholder="Smith" />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                      <div className="space-y-3">
-                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Digital Link</label>
-                        <input
-                          type="email" required
-                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
-                          placeholder="julianne@arch.com"
-                        />
+                    {/* Contact */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="form-label">Email Address</label>
+                        <input type="email" required className="form-input" placeholder="john@email.com" />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Contact Number</label>
-                        <input
-                          type="tel" required
-                          className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 font-display italic rounded-t-xl"
-                          placeholder="+1 ..."
-                        />
+                      <div>
+                        <label className="form-label">Phone Number</label>
+                        <input type="tel" required className="form-input" placeholder="+1 234 567 8900" />
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/20">Special Requests</label>
+                    {/* Nationality */}
+                    <div>
+                      <label className="form-label">Nationality / Country</label>
+                      <input type="text" className="form-input" placeholder="e.g. United Kingdom" />
+                    </div>
+
+                    {/* Special requests */}
+                    <div>
+                      <label className="form-label">Special Requests or Dietary Requirements</label>
                       <textarea
-                        rows={3}
-                        className="w-full bg-sand/10 border-b border-charcoal/10 py-3 px-4 text-charcoal text-xl font-light focus:outline-none focus:border-amber transition-all duration-700 resize-none font-display italic rounded-t-xl"
-                        placeholder="Dietary requirements or specific curiosities..."
+                        rows={4}
+                        className="form-input resize-none"
+                        placeholder="e.g. vegetarian meals, wheelchair access, celebrating an anniversary..."
                       />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
-                       <button type="button" onClick={() => setStep(1)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/30 hover:text-charcoal transition-all hover-trigger">
-                         ← Configuration
-                       </button>
-                       <button type="submit" className="btn-raw !bg-charcoal !text-white hover:!bg-amber hover-trigger !px-12 !py-4 rounded-2xl shadow-xl">
-                         Finalize Reservation Request
-                       </button>
+                    {/* Summary box */}
+                    <div className="flex items-start gap-4 p-4 bg-amber/5 rounded-xl border border-amber/10">
+                      <Calendar className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+                      <div className="text-sm text-charcoal/70">
+                        <p><strong className="text-charcoal">{format(selectedDate, "EEEE, MMMM d, yyyy")}</strong></p>
+                        <p>{adults} adult{adults > 1 ? "s" : ""}{children > 0 ? ` + ${children} child${children > 1 ? "ren" : ""}` : ""} · Total: <strong className="text-amber">${total.toLocaleString()}</strong></p>
+                      </div>
                     </div>
-                </form>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setStep(1)}
+                        className="flex items-center gap-2 text-sm font-semibold text-charcoal/50 hover:text-charcoal transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        Back to Trip Details
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-primary px-10 py-4 text-base flex-1 sm:flex-none justify-center"
+                      >
+                        Complete Booking Request
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </motion.div>
             )}
 
+            {/* ── STEP 3: CONFIRMED ── */}
             {step === 3 && (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                className="max-w-3xl mx-auto text-center py-20 bg-white shadow-2xl rounded-[4rem] px-8 sm:px-16"
+                transition={{ duration: 0.5 }}
+                className="max-w-2xl mx-auto text-center py-8"
               >
-                <div className="w-20 h-20 bg-amber/10 border border-amber text-amber rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-[0_15px_30px_rgba(217,119,6,0.15)] rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                  <Check className="w-10 h-10" />
-                </div>
-                <h2 className="text-[7vw] font-display text-charcoal mb-6 italic leading-none tracking-tighter">Transmitted.</h2>
-                <p className="text-charcoal/60 text-xl font-light leading-relaxed mb-12 max-w-lg mx-auto font-display italic">
-                  "Your journey request has been recorded. An architect will contact 
-                  you within the next solar cycle to finalize the details."
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
-                   <Link to="/" className="btn-raw hover-trigger !px-10 !py-4 rounded-2xl shadow-lg">Return to Archives</Link>
-                   <Link to="/safaris" className="text-[9px] font-bold tracking-[0.4em] uppercase text-charcoal/30 hover:text-charcoal transition-colors hover-trigger">Explore More Collections</Link>
+                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-10 sm:p-16">
+                  <div className="w-20 h-20 bg-green-50 border-2 border-green-200 text-green-500 rounded-2xl flex items-center justify-center mx-auto mb-8">
+                    <Check className="w-10 h-10" />
+                  </div>
+                  <h2 className="text-4xl font-display font-semibold text-charcoal mb-4">
+                    Booking Received!
+                  </h2>
+                  <p className="text-charcoal/60 text-lg leading-relaxed mb-4 max-w-md mx-auto">
+                    Thank you! Your booking request has been submitted successfully.
+                  </p>
+                  <div className="bg-sand/50 rounded-xl p-5 mb-8 text-left space-y-2">
+                    <p className="text-sm text-charcoal/70">
+                      <span className="font-semibold text-charcoal">What happens next:</span>
+                    </p>
+                    <ul className="space-y-1.5 text-sm text-charcoal/60">
+                      <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 shrink-0" /> Our team reviews your request within 2–4 hours</li>
+                      <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 shrink-0" /> You receive a confirmation email with all details</li>
+                      <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 shrink-0" /> We'll contact you to finalise any special arrangements</li>
+                    </ul>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <Link to="/" className="btn-primary px-8 py-3.5">
+                      Back to Home
+                    </Link>
+                    <Link to="/tours" className="btn-outline px-8 py-3.5">
+                      Browse More Tours
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             )}
